@@ -2,6 +2,6 @@
 
 ```
 dependencies {
-  implementation 'com.github.hseapp:Hse-Auth-Android:Tag'
+  implementation 'com.github.hseapp:Hse-Auth-Android:0.5'
 }
 ```
