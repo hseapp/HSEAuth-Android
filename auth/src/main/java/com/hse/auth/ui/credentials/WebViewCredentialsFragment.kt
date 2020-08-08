@@ -13,7 +13,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.hse.auth.R
-import com.hse.auth.di.AuthComponent
+import com.hse.auth.di.AuthComponentProvider
 import com.hse.auth.ui.LoginActivity
 import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.AuthConstants.AUTH_BASE_URL
@@ -29,7 +29,6 @@ import com.hse.auth.utils.AuthConstants.KEY_RESPONSE_TYPE
 import com.hse.auth.utils.AuthConstants.RESPONSE_TYPE
 import com.hse.auth.utils.getClientId
 import com.hse.auth.utils.getRedirectUri
-import com.hse.core.BaseApplication
 import com.hse.core.common.BaseViewModelFactory
 import com.hse.core.ui.BaseFragment
 import javax.inject.Inject
@@ -61,7 +60,9 @@ class WebViewCredentialsFragment :
     ): View? = inflater.inflate(R.layout.fragment_web_auth, container, false)
 
     override fun provideViewModel(): WebViewCredentialsViewModel {
-        (BaseApplication.appComponent as AuthComponent).inject(this)
+        (activity?.applicationContext as? AuthComponentProvider)?.provideAuthComponent()
+            ?.inject(this)
+
         return ViewModelProvider(
             this,
             viewModelFactory
@@ -95,8 +96,6 @@ class WebViewCredentialsFragment :
             )
         }
 
-
-
         viewModel.tokensResultLiveData.observe(viewLifecycleOwner, Observer { model ->
             (activity as? LoginActivity)?.let {
                 val data = Intent().apply {
@@ -117,6 +116,25 @@ class WebViewCredentialsFragment :
             am.addAccountExplicitly(account, "", userData)
             am.setAuthToken(account, account.type, it.accessToken)
         })
+
+        viewModel.closeWithoutResult.observe(viewLifecycleOwner, Observer {
+            if (it) {
+                (activity as? LoginActivity)?.apply {
+                    setResult(Activity.RESULT_CANCELED)
+                    finish()
+                }
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
     }
 
     class Builder : BaseFragment.Builder(WebViewCredentialsFragment::class.java)

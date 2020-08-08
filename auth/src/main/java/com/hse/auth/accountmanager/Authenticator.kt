@@ -11,8 +11,6 @@ import android.util.Log
 class Authenticator(val context: Context) : AbstractAccountAuthenticator(context) {
     companion object {
         private const val TAG = "Authenticator"
-
-        private const val EMPTY_TOKEN = ""
     }
 
     override fun getAuthTokenLabel(authTokenType: String?): String {
@@ -45,26 +43,7 @@ class Authenticator(val context: Context) : AbstractAccountAuthenticator(context
         authTokenType: String?,
         options: Bundle?
     ): Bundle {
-        val result = Bundle()
-//        val am = AccountManager.get(context.applicationContext)
-//        var authToken = am.peekAuthToken(account, authTokenType)
-//        if (TextUtils.isEmpty(authToken)) {
-//            val password = am.getPassword(account)
-//            if (!TextUtils.isEmpty(password)) {
-//                authToken = EMPTY_TOKEN
-//            }
-//        }
-//        if (TextUtils.isEmpty(authToken).not()) {
-//            result.putString(AccountManager.KEY_ACCOUNT_NAME, account?.name ?: "")
-//            result.putString(AccountManager.KEY_ACCOUNT_TYPE, account?.type ?: "")
-//            result.putString(AccountManager.KEY_AUTHTOKEN, authToken)
-//        } else {
-//            val intent = Intent(context, LoginActivity::class.java)
-//            intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response)
-//            //            intent.putExtra(AuthenticatorActivity.EXTRA_TOKEN_TYPE, authTokenType)
-//            result.putParcelable(AccountManager.KEY_INTENT, intent)
-//        }
-        return result
+        return Bundle()
     }
 
     override fun hasFeatures(
@@ -92,13 +71,6 @@ class Authenticator(val context: Context) : AbstractAccountAuthenticator(context
         options: Bundle?
     ): Bundle {
         Log.i(TAG, "addAccount()")
-//        val intent = Intent(context, WebAuthActivity::class.java)
-//        intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response)
-        val bundle = Bundle()
-//        if (options != null) {
-//            bundle.putAll(options)
-//        }
-//        bundle.putParcelable(AccountManager.KEY_INTENT, intent)
-        return bundle
+        return Bundle()
     }
 }

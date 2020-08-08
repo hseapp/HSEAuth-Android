@@ -28,6 +28,12 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
     val userAccountLiveData: LiveData<UserAccountData>
         get() = _userAccountLiveData
 
+    private val _closeWithoutResult: MutableLiveData<Boolean> = MutableLiveData()
+    val closeWithoutResult: LiveData<Boolean>
+        get() = _closeWithoutResult
+
+    private var wasPaused = false
+
     fun onCodeLoaded(
         code: String,
         clientId: String,
@@ -61,6 +67,16 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
                     _userAccountLiveData.value = accountData
                 }
             }
+        }
+    }
+
+    fun onPause() {
+        wasPaused = true
+    }
+
+    fun onResume() {
+        if (wasPaused){
+            _closeWithoutResult.value = true
         }
     }
 }

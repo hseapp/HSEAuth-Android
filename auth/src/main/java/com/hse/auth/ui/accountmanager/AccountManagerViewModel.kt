@@ -4,9 +4,9 @@ import android.accounts.AccountManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.hse.auth.models.MeDataEntity
 import com.hse.auth.requests.GetMeRequest
 import com.hse.auth.ui.models.UserAccountData
+import com.hse.auth.ui.models.UserEntity
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
 import com.hse.core.enums.LoadingState
 import com.hse.core.viewmodels.BaseViewModel
@@ -32,8 +32,8 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
     val userAccountLiveData: LiveData<UserAccountData>
         get() = _userAccountLiveData
 
-    private val _meEntityLiveData: MutableLiveData<MeDataEntity> = MutableLiveData()
-    val meEntityLiveData: LiveData<MeDataEntity>
+    private val _meEntityLiveData: MutableLiveData<UserEntity> = MutableLiveData()
+    val meEntityLiveData: LiveData<UserEntity>
         get() = _meEntityLiveData
 
     private val _navigateToCredentials: MutableLiveData<Boolean> = MutableLiveData()
@@ -55,7 +55,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
 
                 GetMeRequest().run(network)?.let { meEntity ->
                     withContext(Dispatchers.Main) {
-                        _meEntityLiveData.value = meEntity
+                        _meEntityLiveData.value = meEntity.toEntity()
                     }
                 }
 

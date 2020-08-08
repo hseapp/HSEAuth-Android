@@ -12,11 +12,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import coil.api.load
 import com.hse.auth.R
-import com.hse.auth.di.AuthComponent
+import com.hse.auth.di.AuthComponentProvider
 import com.hse.auth.ui.credentials.WebViewCredentialsFragment
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_TOKEN
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
-import com.hse.core.BaseApplication
 import com.hse.core.common.BaseViewModelFactory
 import com.hse.core.common.activity
 import com.hse.core.common.onClick
@@ -43,7 +42,8 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
     ): View? = inflater.inflate(R.layout.fragment_account_manager, container, false)
 
     override fun provideViewModel(): AccountManagerViewModel {
-        (BaseApplication.appComponent as AuthComponent).inject(this)
+        (activity?.applicationContext as? AuthComponentProvider)?.provideAuthComponent()
+            ?.inject(this)
         return ViewModelProvider(this, viewModelFactory).get(AccountManagerViewModel::class.java)
     }
 
@@ -59,7 +59,7 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
                 loginWithAccountManagerBtn.text =
                     getString(R.string.acc_manager_continue_with_placeholder, userData.email)
 
-                loginWithAccountManagerBtn.setOnClickListener {
+                loginWithAccountManagerBtn.onClick {
                     activity?.let {
                         val data = Intent().apply {
                             putExtra(KEY_ACCESS_TOKEN, userData.accessToken)
@@ -84,8 +84,8 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
         )
 
         viewModel.meEntityLiveData.observe(viewLifecycleOwner,
-            Observer { meDataEntity ->
-                userAvatarIv.load(meDataEntity.user?.avatarUrl) {
+            Observer { userEntity ->
+                userAvatarIv.load(userEntity.avatar) {
                     crossfade(true)
                 }
             }
