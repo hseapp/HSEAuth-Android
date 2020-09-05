@@ -12,4 +12,5 @@
 
     <string name="acc_manager_continue_with_placeholder">Продолжить как %s</string>
     <string name="acc_manager_new_login">Войти в другой аккаунт</string>
+    <string name="continue_as">Продолжить как:</string>
 </resources>

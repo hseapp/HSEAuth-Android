@@ -2,7 +2,7 @@ package com.hse.auth.requests
 
 import com.google.gson.Gson
 import com.hse.auth.models.TokensModel
-import com.hse.auth.utils.AuthConstants.GRANT_TYPE
+import com.hse.auth.utils.AuthConstants.AUTH_GRANT_TYPE
 import com.hse.auth.utils.AuthConstants.KEY_CLIENT_ID
 import com.hse.auth.utils.AuthConstants.KEY_CODE
 import com.hse.auth.utils.AuthConstants.KEY_GRANT_TYPE
@@ -21,7 +21,7 @@ class TokenRequest(
         params.put(KEY_CODE, code)
         params.put(KEY_CLIENT_ID, clientId)
         params.put(KEY_REDIRECT_URI, redirectUri)
-        params.put(KEY_GRANT_TYPE, GRANT_TYPE)
+        params.put(KEY_GRANT_TYPE, AUTH_GRANT_TYPE)
     }
 
     override fun parse(response: String): TokensModel {

@@ -1,10 +1,11 @@
 package com.hse.hseauth
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
+import android.widget.Toast
 import com.hse.auth.AuthHelper
+import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.Mode
 import com.hse.core.BaseApplication
 import com.hse.core.ui.BaseActivity
@@ -25,5 +26,12 @@ class MainActivity : BaseActivity() {
     override fun onNewIntent(intent: Intent?) {
         AuthHelper.onNewIntent(intent, this, 1)
         super.onNewIntent(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            Toast.makeText(this, "success", Toast.LENGTH_SHORT).show()
+        }
     }
 }

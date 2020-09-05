@@ -59,7 +59,8 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
                 val accountData = UserAccountData(
                     email = userEmail,
                     accessToken = tokensResult.accessToken,
-                    refreshToken = tokensResult.refreshToken
+                    refreshToken = tokensResult.refreshToken,
+                    avatartUrl = null
                 )
 
                 withContext(Dispatchers.Main) {
