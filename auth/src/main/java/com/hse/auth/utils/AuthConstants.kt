@@ -16,7 +16,8 @@ object AuthConstants {
     internal const val KEY_CODE = "code"
 
     internal const val KEY_GRANT_TYPE = "grant_type"
-    internal const val GRANT_TYPE = "authorization_code"
+    internal const val AUTH_GRANT_TYPE = "authorization_code"
+    internal const val REFRESH_GRANT_TYPE = "refresh_token"
 
     internal const val KEY_META_DATA_CLIENT_ID = "auth.hse.ru.client_id"
     internal const val KEY_META_DATA_REDIRECT_URI = "auth.hse.ru.redirect_uri"

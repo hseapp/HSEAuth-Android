@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName
 import com.hse.auth.ui.models.UserEntity
 
 data class MeDataEntity(
-    @SerializedName("profile") var user: StudentDataEntity?
+    @SerializedName("avatar_url") var avatarUrl: String?
 ) : BaseDataEntity<UserEntity> {
 
     override fun toEntity(): UserEntity {
-        return user!!.toEntity()
+        return UserEntity(avatar = avatarUrl)
     }
 }

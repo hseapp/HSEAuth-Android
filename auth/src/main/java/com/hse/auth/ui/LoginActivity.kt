@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import com.hse.auth.R
 import com.hse.auth.ui.accountmanager.AccountManagerFragment
-import com.hse.auth.ui.credentials.CredentialsFragment
 import com.hse.auth.ui.credentials.WebViewCredentialsFragment
 import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.Mode
@@ -20,7 +19,7 @@ class LoginActivity : BaseActivity(), NavigationCallback {
 
     private fun getRootTag(): String {
         return when (mode) {
-            Mode.BASIC -> CredentialsFragment.TAG
+            Mode.BASIC -> WebViewCredentialsFragment.TAG
             else -> ""
         }
     }

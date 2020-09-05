@@ -1,5 +1,6 @@
 package com.hse.auth.ui.accountmanager
 
+import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
@@ -10,13 +11,13 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import coil.api.load
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.hse.auth.R
-import com.hse.auth.di.AuthComponent
+import com.hse.auth.di.AuthComponentProvider
 import com.hse.auth.ui.credentials.WebViewCredentialsFragment
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_TOKEN
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
-import com.hse.core.BaseApplication
+import com.hse.auth.utils.getClientId
 import com.hse.core.common.BaseViewModelFactory
 import com.hse.core.common.activity
 import com.hse.core.common.onClick
@@ -43,7 +44,8 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
     ): View? = inflater.inflate(R.layout.fragment_account_manager, container, false)
 
     override fun provideViewModel(): AccountManagerViewModel {
-        (BaseApplication.appComponent as AuthComponent).inject(this)
+        (activity?.applicationContext as? AuthComponentProvider)?.provideAuthComponent()
+            ?.inject(this)
         return ViewModelProvider(this, viewModelFactory).get(AccountManagerViewModel::class.java)
     }
 
@@ -51,30 +53,33 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
         val am = AccountManager.get(context)
         viewModel.onViewCreated(
             am,
-            getString(R.string.ru_hseid_acc_type)
+            getString(R.string.ru_hseid_acc_type),
+            requireContext().getClientId()
         )
 
-        viewModel.userAccountLiveData.observe(viewLifecycleOwner,
-            Observer { userData ->
-                loginWithAccountManagerBtn.text =
-                    getString(R.string.acc_manager_continue_with_placeholder, userData.email)
-
-                loginWithAccountManagerBtn.setOnClickListener {
-                    activity?.let {
-                        val data = Intent().apply {
-                            putExtra(KEY_ACCESS_TOKEN, userData.accessToken)
-                            putExtra(KEY_REFRESH_TOKEN, userData.refreshToken)
-                        }
-                        it.setResult(Activity.RESULT_OK, data)
-                        it.finish()
+        val adapter = UserAccountsAdapter(
+            onUserClickListener = { userData ->
+                activity?.let {
+                    val data = Intent().apply {
+                        putExtra(KEY_ACCESS_TOKEN, userData.accessToken)
+                        putExtra(KEY_REFRESH_TOKEN, userData.refreshToken)
                     }
+                    it.setResult(Activity.RESULT_OK, data)
+                    it.finish()
                 }
+            }
+        )
+        userAccountsRv.adapter = adapter
+        userAccountsRv.layoutManager = LinearLayoutManager(requireContext())
 
-                loginWithAccountManagerBtn.isVisible = true
+        viewModel.userAccountsLiveData.observe(viewLifecycleOwner,
+            Observer { userAccounts ->
+                adapter.submitList(userAccounts)
             }
         )
 
-        viewModel.navigateToCredentials.observe(viewLifecycleOwner,
+        viewModel.navigateToCredentials.observe(
+            viewLifecycleOwner,
             Observer {
                 if (it) {
                     WebViewCredentialsFragment.Builder().go(activity())
@@ -83,16 +88,17 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
             }
         )
 
-        viewModel.meEntityLiveData.observe(viewLifecycleOwner,
-            Observer { meDataEntity ->
-                userAvatarIv.load(meDataEntity.user?.avatarUrl) {
-                    crossfade(true)
-                }
-            }
-        )
-
         viewModel.loadingState.observe(viewLifecycleOwner, Observer {
             setLoadingState(it)
+        })
+
+        viewModel.userAccountLiveData.observe(viewLifecycleOwner, Observer {
+            val account = Account(it.email, getString(R.string.ru_hseid_acc_type))
+            val userData = Bundle().apply {
+                putString(KEY_REFRESH_TOKEN, it.refreshToken)
+            }
+            am.addAccountExplicitly(account, "", userData)
+            am.setAuthToken(account, account.type, it.accessToken)
         })
 
         loginWithNewAccBtn.onClick {
@@ -102,22 +108,15 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
         backBtn.onClick {
             activity()?.onBackPressed()
         }
-
-        userAvatarCv.setOnLongClickListener {
-            true
-        }
     }
 
     private fun setLoadingState(state: LoadingState) = when (state) {
         LoadingState.LOADING -> {
             loadingPb.isVisible = true
-            userAvatarCv.isVisible = false
-            loginWithAccountManagerBtn.isVisible = false
             loginWithNewAccBtn.isVisible = false
         }
         LoadingState.DONE -> {
             loadingPb.isVisible = false
-            userAvatarCv.isVisible = true
             loginWithNewAccBtn.isVisible = true
         }
         LoadingState.ERROR -> {
