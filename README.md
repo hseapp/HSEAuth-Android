@@ -58,8 +58,8 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
         when (requestCode) {
             REQUEST_LOGIN -> {
                 if (resultCode != Activity.RESULT_OK || data == null) return
-                val accessToken = data.getStringExtra("access_token")
-                val refreshToken = data.getStringExtra("refresh_token")
+                val accessToken = data.getStringExtra(AuthConstants.KEY_ACCESS_TOKEN)
+                val refreshToken = data.getStringExtra(AuthConstants.KEY_REFRESH_TOKEN)
                 viewModel.updateLoginState(accessToken, refreshToken)
             }
         }
