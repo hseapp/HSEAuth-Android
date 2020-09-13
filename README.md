@@ -2,7 +2,7 @@
 
 ```
 dependencies {
-  implementation 'com.github.hseapp:Hse-Auth-Android:0.6'
+  implementation 'com.github.hseapp:Hse-Auth-Android:0.7.1'
 }
 ```
 
