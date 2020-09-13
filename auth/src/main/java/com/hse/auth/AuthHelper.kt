@@ -6,7 +6,9 @@ import com.hse.auth.ui.LoginActivity
 import com.hse.auth.ui.LoginBottomSheet
 import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.Mode
+import com.hse.auth.utils.getClientId
 import com.hse.auth.utils.getRedirectUri
+import com.hse.core.BaseApplication
 
 object AuthHelper {
 
@@ -28,4 +30,6 @@ object AuthHelper {
             }
         }
     }
+
+    fun getClientId() = BaseApplication.appContext.getClientId()
 }

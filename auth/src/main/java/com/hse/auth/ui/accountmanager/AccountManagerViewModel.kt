@@ -32,40 +32,43 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
         if (throwable.message == TOKEN_EXPIRED_ERROR_MESSAGE) {
             Log.i("LOL", "TokenExpired")
             viewModelScope.launch(Dispatchers.IO) {
-                Log.i("LOL", "TryRefresh")
-                val tokensResult = RefreshTokenRequest(
-                    clientId = clientId,
-                    refreshToken = refreshToken
-                ).run(network)
-                Log.i("LOL", "TokensRefreshResult $tokensResult")
+                try {
+                    Log.i("LOL", "TryRefresh")
+                    val tokensResult = RefreshTokenRequest(
+                        clientId = clientId,
+                        refreshToken = refreshToken
+                    ).run(network)
 
-                if (tokensResult?.accessToken == null) {
-                    Log.i("LOL", "No new token, auth again")
-                    _navigateToCredentials.postValue(true)
-                } else {
-                    Log.i("LOL", "Successfully refreshed")
-                    var userEmail = ""
-                    JWT(tokensResult.accessToken).getClaim(AuthConstants.KEY_EMAIL).asString()
-                        ?.let {
-                            userEmail = it
-                        } ?: JWT(tokensResult.idToken).getClaim(AuthConstants.KEY_EMAIL).asString()
-                        ?.let {
-                            userEmail = it
-                        } ?: JWT(tokensResult.idToken).getClaim(AuthConstants.KEY_UPN).asString()
-                        ?.let {
-                            userEmail = it
-                        }
+                    if (tokensResult?.accessToken == null) {
+                        Log.i("LOL", "No new token, auth again")
+                        _navigateToCredentials.postValue(true)
+                    } else {
+                        Log.i("LOL", "Successfully refreshed")
+                        var userEmail = ""
+                        JWT(tokensResult.accessToken).getClaim(AuthConstants.KEY_EMAIL).asString()
+                            ?.let {
+                                userEmail = it
+                            } ?: JWT(tokensResult.idToken).getClaim(AuthConstants.KEY_EMAIL)
+                            .asString()
+                            ?.let {
+                                userEmail = it
+                            } ?: JWT(tokensResult.idToken).getClaim(AuthConstants.KEY_UPN)
+                            .asString()
+                            ?.let {
+                                userEmail = it
+                            }
 
-                    val accountData = UserAccountData(
-                        email = userEmail,
-                        accessToken = tokensResult.accessToken,
-                        refreshToken = tokensResult.refreshToken,
-                        avatartUrl = null
-                    )
-                    _userAccountLiveData.postValue(accountData)
+                        val accountData = UserAccountData(
+                            email = userEmail,
+                            accessToken = tokensResult.accessToken,
+                            refreshToken = tokensResult.refreshToken,
+                            avatartUrl = null
+                        )
+                        _userAccountLiveData.postValue(accountData)
 
-                    reloadUserAccountData(accountManager, accountType, clientId)
-                }
+                        reloadUserAccountData(accountManager, accountType, clientId)
+                    }
+                } catch (e: Exception) {}
             }
         }
     }
