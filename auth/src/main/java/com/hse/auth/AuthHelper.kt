@@ -22,8 +22,8 @@ object AuthHelper {
     fun onNewIntent(intent: Intent?, activity: Activity, requestCode: Int) {
         val manifestUri = activity.getRedirectUri()
         intent?.data?.toString()?.let { intentUri ->
-
-            if (intentUri.substring(0, intentUri.indexOf('?')) == manifestUri) {
+            val sbstr = intentUri.indexOf('?')
+            if (sbstr > 0 && intentUri.substring(0, sbstr) == manifestUri) {
                 intent.data?.getQueryParameter(AuthConstants.KEY_CODE)?.let { code ->
                     LoginActivity.launch(activity, requestCode = requestCode, loginCode = code)
                 }
