@@ -57,7 +57,6 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                             ?.let {
                                 userEmail = it
                             }
-
                         val accountData = UserAccountData(
                             email = userEmail,
                             accessToken = tokensResult.accessToken,

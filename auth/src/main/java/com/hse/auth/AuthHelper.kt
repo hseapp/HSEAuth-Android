@@ -29,6 +29,7 @@ object AuthHelper {
                 }
             }
         }
+
     }
 
     fun getClientId() = BaseApplication.appContext.getClientId()

@@ -59,6 +59,6 @@ dependencies {
     implementation "androidx.browser:browser:1.2.0"
     implementation 'com.auth0.android:jwtdecode:2.0.0'
 
-    implementation 'com.github.hseapp:HseNetwork:1.0'
+    implementation 'com.github.hseapp:HseNetwork:1.0.1'
     implementation 'com.github.hseapp:HSECore-Android:0.5.1'
 }
