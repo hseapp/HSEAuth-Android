@@ -14,6 +14,7 @@ import com.hse.network.Network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.joda.time.DateTime
 import javax.inject.Inject
 
 class WebViewCredentialsViewModel @Inject constructor(private val network: Network) :
@@ -59,13 +60,15 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
                 val accountData = UserAccountData(
                     email = userEmail,
                     accessToken = tokensResult.accessToken,
-                    refreshToken = tokensResult.refreshToken,
-                    avatartUrl = null
+                    refreshToken = tokensResult.refreshToken!!,
+                    avatartUrl = null,
+                    accessExpiresIn = DateTime().millis + tokensResult.accessExpiresIn * 1000,
+                    refreshExpiresIn = DateTime().millis + tokensResult.refreshExpiresIn * 1000
                 )
 
                 withContext(Dispatchers.Main) {
-                    _tokensResultLiveData.value = tokensResult
                     _userAccountLiveData.value = accountData
+                    _tokensResultLiveData.value = tokensResult
                 }
             }
         }

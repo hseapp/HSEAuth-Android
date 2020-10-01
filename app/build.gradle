@@ -46,6 +46,5 @@ dependencies {
     implementation 'com.github.hseapp:hsecore:0.3'
     implementation 'com.github.hseapp:HseNetwork:1.0'
 
-
     implementation project(":auth")
 }

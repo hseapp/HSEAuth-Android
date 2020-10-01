@@ -6,6 +6,9 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,15 +18,20 @@ import androidx.lifecycle.ViewModelProvider
 import com.hse.auth.R
 import com.hse.auth.di.AuthComponentProvider
 import com.hse.auth.ui.LoginActivity
+import com.hse.auth.ui.models.UserAccountData
 import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.AuthConstants.AUTH_BASE_URL
+import com.hse.auth.utils.AuthConstants.AUTH_LOGIN_HINT
 import com.hse.auth.utils.AuthConstants.AUTH_PATH_ADFS
 import com.hse.auth.utils.AuthConstants.AUTH_PATH_AUTHORIZE
 import com.hse.auth.utils.AuthConstants.AUTH_PATH_OAUTH
+import com.hse.auth.utils.AuthConstants.AUTH_PROMPT
 import com.hse.auth.utils.AuthConstants.AUTH_SCHEME
+import com.hse.auth.utils.AuthConstants.KEY_ACCESS_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_TOKEN
 import com.hse.auth.utils.AuthConstants.KEY_CLIENT_ID
 import com.hse.auth.utils.AuthConstants.KEY_REDIRECT_URI
+import com.hse.auth.utils.AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
 import com.hse.auth.utils.AuthConstants.KEY_RESPONSE_TYPE
 import com.hse.auth.utils.AuthConstants.RESPONSE_TYPE
@@ -39,6 +47,9 @@ class WebViewCredentialsFragment :
 
     companion object {
         const val TAG = "WebViewCredentialsFragment"
+
+        const val KEY_USER_ACCOUNT_DATA = "user_account_data_key"
+        const val PROMPT = "login"
 
         fun newInstance(code: String?): WebViewCredentialsFragment =
             WebViewCredentialsFragment().apply {
@@ -77,7 +88,7 @@ class WebViewCredentialsFragment :
                 requireContext().getRedirectUri()
             )
         } ?: run {
-            val uri = Uri.Builder()
+            val uriBuilder = Uri.Builder()
                 .scheme(AUTH_SCHEME)
                 .authority(AUTH_BASE_URL)
                 .appendPath(AUTH_PATH_ADFS)
@@ -85,8 +96,14 @@ class WebViewCredentialsFragment :
                 .appendPath(AUTH_PATH_AUTHORIZE)
                 .appendQueryParameter(KEY_CLIENT_ID, context?.getClientId())
                 .appendQueryParameter(KEY_RESPONSE_TYPE, RESPONSE_TYPE)
+                .appendQueryParameter(AUTH_PROMPT, PROMPT)
                 .appendQueryParameter(KEY_REDIRECT_URI, context?.getRedirectUri())
-                .build()
+
+            arguments?.getParcelable<UserAccountData>(KEY_USER_ACCOUNT_DATA)?.let {
+                uriBuilder.appendQueryParameter(AUTH_LOGIN_HINT, it.email)
+            }
+
+            val uri = uriBuilder.build()
 
             val builder = CustomTabsIntent.Builder()
             val customTabsIntent = builder.build()
@@ -111,10 +128,20 @@ class WebViewCredentialsFragment :
             val account = Account(it.email, getString(R.string.ru_hseid_acc_type))
             val userData = Bundle().apply {
                 putString(KEY_REFRESH_TOKEN, it.refreshToken)
+                putString(KEY_ACCESS_EXPIRES_IN_MILLIS, it.accessExpiresIn.toString())
+                putString(KEY_REFRESH_EXPIRES_IN_MILLIS, it.refreshExpiresIn.toString())
             }
             val am = AccountManager.get(context)
-            am.addAccountExplicitly(account, "", userData)
-            am.setAuthToken(account, account.type, it.accessToken)
+            am.removeAccount(
+                account,
+                { future ->
+                    Log.i("LOL", "What happened $future?")
+
+                    am.addAccountExplicitly(account, "", userData)
+                    am.setAuthToken(account, account.type, it.accessToken)
+                },
+                Handler(Looper.getMainLooper())
+            )
         })
 
         viewModel.closeWithoutResult.observe(viewLifecycleOwner, Observer {
@@ -137,5 +164,10 @@ class WebViewCredentialsFragment :
         viewModel.onPause()
     }
 
-    class Builder : BaseFragment.Builder(WebViewCredentialsFragment::class.java)
+    class Builder : BaseFragment.Builder(WebViewCredentialsFragment::class.java) {
+        fun addUserAccountData(userAccountData: UserAccountData): Builder {
+            arguments.putParcelable(KEY_USER_ACCOUNT_DATA, userAccountData)
+            return this
+        }
+    }
 }

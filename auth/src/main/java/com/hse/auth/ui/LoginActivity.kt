@@ -13,6 +13,7 @@ import com.hse.core.navigation.Navigation
 import com.hse.core.navigation.NavigationCallback
 import com.hse.core.ui.BaseActivity
 import com.hse.core.ui.BaseFragment
+import net.danlew.android.joda.JodaTimeAndroid
 
 class LoginActivity : BaseActivity(), NavigationCallback {
     val mode = Mode.BASIC
@@ -40,6 +41,7 @@ class LoginActivity : BaseActivity(), NavigationCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        JodaTimeAndroid.init(this)
         setContentView(R.layout.activity_login)
 
         navigation =
