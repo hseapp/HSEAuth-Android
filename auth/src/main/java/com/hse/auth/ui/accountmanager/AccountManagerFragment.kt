@@ -100,6 +100,7 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
                 }
                 it.setResult(Activity.RESULT_OK, data)
                 it.finish()
+                it.overridePendingTransition(0, 0)
             }
         })
 
@@ -109,10 +110,6 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
 
         loginWithNewAccBtn.onClick {
             viewModel.onNewAccLoginClick()
-        }
-
-        backBtn.onClick {
-            activity()?.onBackPressed()
         }
     }
 

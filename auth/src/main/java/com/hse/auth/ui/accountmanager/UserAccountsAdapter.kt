@@ -51,6 +51,9 @@ class UserAccountsAdapter(
         holder.view.userEmailTv.text = item.email
         holder.view.userAvatarIv.load(item.avatartUrl) {
             crossfade(true)
+            error(R.drawable.ic_person)
+            fallback(R.drawable.ic_person)
+            placeholder(R.drawable.ic_person)
         }
         holder.view.userContainerLl.onClick {
             onUserClickListener.invoke(item)
