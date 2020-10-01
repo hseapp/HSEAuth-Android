@@ -2,6 +2,7 @@ package com.hse.auth
 
 import android.app.Activity
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import com.hse.auth.ui.LoginActivity
 import com.hse.auth.ui.LoginBottomSheet
 import com.hse.auth.utils.AuthConstants

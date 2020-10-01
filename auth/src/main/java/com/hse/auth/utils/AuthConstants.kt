@@ -6,6 +6,8 @@ object AuthConstants {
     internal const val AUTH_PATH_ADFS = "adfs"
     internal const val AUTH_PATH_OAUTH = "oauth2"
     internal const val AUTH_PATH_AUTHORIZE = "authorize"
+    internal const val AUTH_LOGIN_HINT = "login_hint"
+    internal const val AUTH_PROMPT = "prompt"
 
     internal const val KEY_CLIENT_ID = "client_id"
     internal const val KEY_REDIRECT_URI = "redirect_uri"
@@ -25,6 +27,9 @@ object AuthConstants {
     internal const val KEY_EMAIL = "email"
     internal const val KEY_UPN = "upn"
 
+    const val KEY_ACCESS_EXPIRES_IN_MILLIS = "access_expires_in"
+    const val KEY_REFRESH_EXPIRES_IN_MILLIS = "refresh_expires_in"
     const val KEY_ACCESS_TOKEN = "access_token"
     const val KEY_REFRESH_TOKEN = "refresh_token"
+
 }

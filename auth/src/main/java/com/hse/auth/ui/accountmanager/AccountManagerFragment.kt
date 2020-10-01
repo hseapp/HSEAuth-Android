@@ -58,16 +58,7 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
         )
 
         val adapter = UserAccountsAdapter(
-            onUserClickListener = { userData ->
-                activity?.let {
-                    val data = Intent().apply {
-                        putExtra(KEY_ACCESS_TOKEN, userData.accessToken)
-                        putExtra(KEY_REFRESH_TOKEN, userData.refreshToken)
-                    }
-                    it.setResult(Activity.RESULT_OK, data)
-                    it.finish()
-                }
-            }
+            onUserClickListener = viewModel::onAccountClicked
         )
         userAccountsRv.adapter = adapter
         userAccountsRv.layoutManager = LinearLayoutManager(requireContext())
@@ -101,12 +92,24 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
             am.setAuthToken(account, account.type, it.accessToken)
         })
 
+        viewModel.loginWithSelectedAccount.observe(viewLifecycleOwner, Observer { userData ->
+            activity?.let {
+                val data = Intent().apply {
+                    putExtra(KEY_ACCESS_TOKEN, userData.accessToken)
+                    putExtra(KEY_REFRESH_TOKEN, userData.refreshToken)
+                }
+                it.setResult(Activity.RESULT_OK, data)
+                it.finish()
+                it.overridePendingTransition(0, 0)
+            }
+        })
+
+        viewModel.reloginWithSelectedAccount.observe(viewLifecycleOwner, Observer { userData ->
+            WebViewCredentialsFragment.Builder().addUserAccountData(userData).go(activity())
+        })
+
         loginWithNewAccBtn.onClick {
             viewModel.onNewAccLoginClick()
-        }
-
-        backBtn.onClick {
-            activity()?.onBackPressed()
         }
     }
 

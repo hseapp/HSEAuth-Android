@@ -4,6 +4,9 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.LinearLayout
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hse.auth.R
 import com.hse.auth.ui.accountmanager.AccountManagerFragment
 import com.hse.auth.ui.credentials.WebViewCredentialsFragment
@@ -13,9 +16,39 @@ import com.hse.core.navigation.Navigation
 import com.hse.core.navigation.NavigationCallback
 import com.hse.core.ui.BaseActivity
 import com.hse.core.ui.BaseFragment
+import kotlinx.android.synthetic.main.activity_login.*
+import net.danlew.android.joda.JodaTimeAndroid
 
 class LoginActivity : BaseActivity(), NavigationCallback {
-    val mode = Mode.BASIC
+    private val mode = Mode.BASIC
+
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        navigation?.onSaveInstanceState(outState)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        JodaTimeAndroid.init(this)
+        setContentView(R.layout.activity_login)
+        initBottomSheetBehavior()
+
+        navigation =
+            Navigation(savedInstanceState, R.id.navHostFragment, supportFragmentManager, this)
+        if (savedInstanceState == null) navigation?.switchStack(getRootTag())
+    }
+
+    override fun getRootFragment(rootTag: String) = getRootFragment()
+
+    override fun onStackChanged(newRootTag: String) = Unit
+
+    override fun onTopFragmentChanged(fragment: BaseFragment<*>?, rootTag: String) = Unit
+
+    override fun onBackPressed() {
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+    }
 
     private fun getRootTag(): String {
         return when (mode) {
@@ -33,26 +66,28 @@ class LoginActivity : BaseActivity(), NavigationCallback {
         else WebViewCredentialsFragment.newInstance(code)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        navigation?.onSaveInstanceState(outState)
-    }
+    private fun initBottomSheetBehavior() {
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        // Expanded by default
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetBehavior.skipCollapsed = true
+        bottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    finish()
+                    overridePendingTransition(0, 0)
+                }
+            }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
 
-        navigation =
-            Navigation(savedInstanceState, R.id.navHostFragment, supportFragmentManager, this)
-        if (savedInstanceState == null) navigation?.switchStack(getRootTag())
-    }
-
-    override fun getRootFragment(rootTag: String) = getRootFragment()
-
-    override fun onStackChanged(newRootTag: String) {
-    }
-
-    override fun onTopFragmentChanged(fragment: BaseFragment<*>?, rootTag: String) {
+            }
+        }
+        )
+        bottomSheet.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
     }
 
     companion object {

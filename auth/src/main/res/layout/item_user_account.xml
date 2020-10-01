@@ -20,6 +20,7 @@
         android:layout_height="64dp"
         app:cardCornerRadius="33dp"
         app:cardElevation="0dp"
+        android:backgroundTint="#05000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +30,8 @@
             android:id="@+id/userAvatarIv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:src="@mipmap/ic_launcher_round" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_person" />
     </androidx.cardview.widget.CardView>
 
     <TextView
@@ -38,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="16dp"
-        android:gravity="center"
+        android:gravity="start"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
