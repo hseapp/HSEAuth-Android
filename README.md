@@ -2,7 +2,7 @@
 
 ```
 dependencies {
-  implementation 'com.github.hseapp:Hse-Auth-Android:0.5'
+  implementation 'com.github.hseapp:Hse-Auth-Android:0.7.1'
 }
 ```
 
@@ -58,8 +58,8 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
         when (requestCode) {
             REQUEST_LOGIN -> {
                 if (resultCode != Activity.RESULT_OK || data == null) return
-                val accessToken = data.getStringExtra("access_token")
-                val refreshToken = data.getStringExtra("refresh_token")
+                val accessToken = data.getStringExtra(AuthConstants.KEY_ACCESS_TOKEN)
+                val refreshToken = data.getStringExtra(AuthConstants.KEY_REFRESH_TOKEN)
                 viewModel.updateLoginState(accessToken, refreshToken)
             }
         }
@@ -74,3 +74,6 @@ private fun requestLogin(mode: Mode) {
 ```
 
 В зависимости от наличия данных в AccountManager откроется либо webView с авторизацией, либо можно будет зайти по тем данным, которые есть в AccountManger. В любом случае токены будут прилетать в onActivityResult()
+
+
+#### 6. TODO: about activity(singleTask) and about DI
