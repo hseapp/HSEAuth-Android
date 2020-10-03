@@ -49,6 +49,7 @@ class UserAccountsAdapter(
     override fun onBindViewHolder(holder: UserAccountViewHolder, position: Int) {
         val item = getItem(position)
         holder.view.userEmailTv.text = item.email
+        holder.view.userNameTv.text = item.fullName
         holder.view.userAvatarIv.load(item.avatartUrl) {
             crossfade(true)
             error(R.drawable.ic_person)

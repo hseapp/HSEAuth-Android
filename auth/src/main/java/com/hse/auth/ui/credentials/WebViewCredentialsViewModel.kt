@@ -5,15 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
 import com.hse.auth.models.TokensModel
+import com.hse.auth.requests.GetMeRequest
 import com.hse.auth.requests.TokenRequest
 import com.hse.auth.ui.models.UserAccountData
 import com.hse.auth.utils.AuthConstants
 import com.hse.core.enums.LoadingState
 import com.hse.core.viewmodels.BaseViewModel
 import com.hse.network.Network
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import javax.inject.Inject
 
@@ -57,19 +56,22 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
                     userEmail = it
                 }
 
-                val accountData = UserAccountData(
-                    email = userEmail,
-                    accessToken = tokensResult.accessToken,
-                    refreshToken = tokensResult.refreshToken!!,
-                    avatartUrl = null,
-                    accessExpiresIn = DateTime().millis + tokensResult.accessExpiresIn * 1000,
-                    refreshExpiresIn = DateTime().millis + tokensResult.refreshExpiresIn * 1000
-                )
+                GetMeRequest(tokensResult.accessToken).run(network)
+                    ?.let { meEntity ->
 
-                withContext(Dispatchers.Main) {
-                    _userAccountLiveData.value = accountData
-                    _tokensResultLiveData.value = tokensResult
-                }
+                        val accountData = UserAccountData(
+                            email = userEmail,
+                            accessToken = tokensResult.accessToken,
+                            refreshToken = tokensResult.refreshToken!!,
+                            avatartUrl = meEntity.avatarUrl,
+                            fullName = meEntity.fullName,
+                            accessExpiresIn = DateTime().millis + tokensResult.accessExpiresIn * 1000,
+                            refreshExpiresIn = DateTime().millis + tokensResult.refreshExpiresIn * 1000
+                        )
+
+                        _userAccountLiveData.postValue(accountData)
+                        _tokensResultLiveData.postValue(tokensResult)
+                    }
             }
         }
     }
