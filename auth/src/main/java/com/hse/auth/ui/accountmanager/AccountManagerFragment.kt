@@ -8,12 +8,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hse.auth.R
 import com.hse.auth.di.AuthComponentProvider
+import com.hse.auth.ui.LoginActivity
 import com.hse.auth.ui.credentials.WebViewCredentialsFragment
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_TOKEN
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
@@ -99,13 +102,20 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
                     putExtra(KEY_REFRESH_TOKEN, userData.refreshToken)
                 }
                 it.setResult(Activity.RESULT_OK, data)
-                it.finish()
-                it.overridePendingTransition(0, 0)
+                (it as? LoginActivity)?.bottomSheetBehavior?.state =
+                    BottomSheetBehavior.STATE_HIDDEN
             }
         })
 
         viewModel.reloginWithSelectedAccount.observe(viewLifecycleOwner, Observer { userData ->
             WebViewCredentialsFragment.Builder().addUserAccountData(userData).go(activity())
+        })
+
+        viewModel.error.observe(viewLifecycleOwner, Observer {
+            Toast.makeText(requireContext(), getString(R.string.error_happened), Toast.LENGTH_SHORT)
+                .show()
+            (activity() as? LoginActivity)?.bottomSheetBehavior?.state =
+                BottomSheetBehavior.STATE_HIDDEN
         })
 
         loginWithNewAccBtn.onClick {

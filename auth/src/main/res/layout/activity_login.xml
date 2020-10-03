@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/test">
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/bottomSheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -27,8 +27,6 @@
             android:clipChildren="false"
             android:clipToPadding="false"
             android:gravity="bottom"
-            android:orientation="vertical"
-            android:paddingBottom="32dp"
-            android:paddingTop="16dp"/>
-    </LinearLayout>
+            android:orientation="vertical" />
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

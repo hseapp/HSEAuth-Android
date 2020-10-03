@@ -11,15 +11,14 @@ import com.hse.auth.requests.RefreshTokenRequest
 import com.hse.auth.ui.models.UserAccountData
 import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_EXPIRES_IN_MILLIS
+import com.hse.auth.utils.AuthConstants.KEY_AVATAR_URL
+import com.hse.auth.utils.AuthConstants.KEY_FULL_NAME
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
 import com.hse.core.enums.LoadingState
 import com.hse.core.viewmodels.BaseViewModel
 import com.hse.network.Network
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.joda.time.DateTime
 import javax.inject.Inject
 
@@ -39,6 +38,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, "${throwable.message}")
+//        _error.postValue(throwable)
     }
 
     private val _userAccountsLiveData: MutableLiveData<List<UserAccountData>> = MutableLiveData()
@@ -61,6 +61,10 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
     val reloginWithSelectedAccount: LiveData<UserAccountData>
         get() = _reloginWithSelectedAccount
 
+    private val _error: MutableLiveData<Throwable> = MutableLiveData()
+    val error: LiveData<Throwable>
+        get() = _error
+
     lateinit var clientId: String
     lateinit var refreshToken: String
     lateinit var accountManager: AccountManager
@@ -70,36 +74,39 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
         accountManager: AccountManager,
         accountType: String,
         clientId: String
-    ) = viewModelScope.launch(Dispatchers.IO + exceptionsHandler) {
+    ) = CoroutineScope(SupervisorJob() + viewModelScope.coroutineContext).launch() {
         this@AccountManagerViewModel.clientId = clientId
         this@AccountManagerViewModel.accountManager = accountManager
         this@AccountManagerViewModel.accountType = accountType
 
         val accounts = accountManager.accounts.filter { it.type == accountType }
-        withContext(Dispatchers.Main) {
-            loadingState.value = LoadingState.LOADING
-        }
-
+        loadingState.value = LoadingState.LOADING
         val accountsDataList = mutableListOf<UserAccountData>()
+        Log.i(TAG, "For start")
         accounts.forEach { acc ->
-            val token = accountManager.blockingGetAuthToken(acc, acc.type, true)
-            val refreshToken = accountManager.getUserData(acc, KEY_REFRESH_TOKEN)
-            val accessExpiresIn =
-                accountManager.getUserData(acc, KEY_ACCESS_EXPIRES_IN_MILLIS).toLong()
-            val refreshExpiresIn =
-                accountManager.getUserData(acc, KEY_REFRESH_EXPIRES_IN_MILLIS).toLong()
+            viewModelScope.launch(Dispatchers.IO + exceptionsHandler) {
+                val token = accountManager.blockingGetAuthToken(acc, acc.type, true)
+                val refreshToken = accountManager.getUserData(acc, KEY_REFRESH_TOKEN)
+                val accessExpiresIn =
+                    accountManager.getUserData(acc, KEY_ACCESS_EXPIRES_IN_MILLIS).toLong()
+                val refreshExpiresIn =
+                    accountManager.getUserData(acc, KEY_REFRESH_EXPIRES_IN_MILLIS).toLong()
+                val fullName = accountManager.getUserData(acc, KEY_FULL_NAME)
+                val avatarUrl = accountManager.getUserData(acc, KEY_AVATAR_URL)
 
-            this@AccountManagerViewModel.refreshToken = refreshToken
-            Log.i(TAG, "Data from acc manager\nToken\n$token\nRefreshToken\n$refreshToken")
+                this@AccountManagerViewModel.refreshToken = refreshToken
+                Log.i(TAG, "Data from acc manager\nToken\n$token\nRefreshToken\n$refreshToken")
 
-            if (accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
-                try {
+                //Токен не протух
+                if (accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
+                    Log.i(TAG, "Try for get user for \n$token")
                     GetMeRequest(token).run(network)
                         ?.let { meEntity ->
                             accountsDataList.add(
                                 UserAccountData(
                                     acc.name,
                                     meEntity.avatarUrl,
+                                    meEntity.fullName,
                                     token,
                                     refreshToken,
                                     accessExpiresIn,
@@ -108,27 +115,25 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                             )
                             Log.i(TAG, "Successful got user data with token from acc manager")
                         }
-                } catch (e: Exception) {
-                    Log.i(TAG, "Catched ${e.message}")
-                }
-            } else {
-                accountsDataList.add(
-                    UserAccountData(
-                        acc.name,
-                        null,
-                        token,
-                        refreshToken,
-                        accessExpiresIn,
-                        refreshExpiresIn
+                } else {// Протух
+                    accountsDataList.add(
+                        UserAccountData(
+                            acc.name,
+                            avatarUrl,
+                            fullName,
+                            token,
+                            refreshToken,
+                            accessExpiresIn,
+                            refreshExpiresIn
+                        )
                     )
-                )
-            }
+                }
+                Unit
+            }.join()
         }
-
-        withContext(Dispatchers.Main) {
-            _userAccountsLiveData.value = accountsDataList
-            loadingState.value = LoadingState.DONE
-        }
+        Log.i(TAG, "For end")
+        _userAccountsLiveData.postValue(accountsDataList)
+        loadingState.postValue(LoadingState.DONE)
     }
 
     fun onNewAccLoginClick() {
@@ -172,18 +177,23 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                             userEmail = it
                         }
 
-                    val accountData = UserAccountData(
-                        email = userEmail,
-                        accessToken = tokensResult.accessToken,
-                        refreshToken = tokensResult.refreshToken ?: refreshToken,
-                        avatartUrl = null,
-                        accessExpiresIn = tokensResult.accessExpiresIn,
-                        refreshExpiresIn = tokensResult.refreshExpiresIn
-                    )
-                    _userAccountLiveData.postValue(accountData)
-                    _loginWithSelectedAccount.postValue(accountData)
+                    GetMeRequest(tokensResult.accessToken).run(network)
+                        ?.let { meEntity ->
+
+                            val accountData = UserAccountData(
+                                email = userEmail,
+                                accessToken = tokensResult.accessToken,
+                                refreshToken = tokensResult.refreshToken!!,
+                                avatartUrl = meEntity.avatarUrl,
+                                fullName = meEntity.fullName,
+                                accessExpiresIn = DateTime().millis + tokensResult.accessExpiresIn * 1000,
+                                refreshExpiresIn = DateTime().millis + tokensResult.refreshExpiresIn * 1000
+                            )
+                            _userAccountLiveData.postValue(accountData)
+                            _loginWithSelectedAccount.postValue(accountData)
+                        }
                 }
-            } else {//рефреш протух, полный перелогин//TODO: hint for requset
+            } else {//рефреш протух, полный перелогин
                 _reloginWithSelectedAccount.postValue(userAccountData)
             }
         }

@@ -5,7 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.LinearLayout
+import android.widget.FrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hse.auth.R
 import com.hse.auth.ui.accountmanager.AccountManagerFragment
@@ -22,7 +22,7 @@ import net.danlew.android.joda.JodaTimeAndroid
 class LoginActivity : BaseActivity(), NavigationCallback {
     private val mode = Mode.BASIC
 
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

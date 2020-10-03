@@ -8,13 +8,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hse.auth.R
 import com.hse.auth.di.AuthComponentProvider
 import com.hse.auth.ui.LoginActivity
@@ -29,7 +29,9 @@ import com.hse.auth.utils.AuthConstants.AUTH_PROMPT
 import com.hse.auth.utils.AuthConstants.AUTH_SCHEME
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_TOKEN
+import com.hse.auth.utils.AuthConstants.KEY_AVATAR_URL
 import com.hse.auth.utils.AuthConstants.KEY_CLIENT_ID
+import com.hse.auth.utils.AuthConstants.KEY_FULL_NAME
 import com.hse.auth.utils.AuthConstants.KEY_REDIRECT_URI
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
@@ -120,7 +122,7 @@ class WebViewCredentialsFragment :
                     putExtra(KEY_REFRESH_TOKEN, model.refreshToken)
                 }
                 it.setResult(Activity.RESULT_OK, data)
-                it.finish()
+                it.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
             }
         })
 
@@ -130,13 +132,13 @@ class WebViewCredentialsFragment :
                 putString(KEY_REFRESH_TOKEN, it.refreshToken)
                 putString(KEY_ACCESS_EXPIRES_IN_MILLIS, it.accessExpiresIn.toString())
                 putString(KEY_REFRESH_EXPIRES_IN_MILLIS, it.refreshExpiresIn.toString())
+                putString(KEY_AVATAR_URL, it.avatartUrl.toString())
+                putString(KEY_FULL_NAME, it.fullName.toString())
             }
             val am = AccountManager.get(context)
             am.removeAccount(
                 account,
-                { future ->
-                    Log.i("LOL", "What happened $future?")
-
+                { _ ->
                     am.addAccountExplicitly(account, "", userData)
                     am.setAuthToken(account, account.type, it.accessToken)
                 },

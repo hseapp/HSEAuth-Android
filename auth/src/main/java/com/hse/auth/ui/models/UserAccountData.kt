@@ -7,6 +7,7 @@ import kotlinx.android.parcel.Parcelize
 data class UserAccountData(
     val email: String,
     val avatartUrl: String?,
+    val fullName: String?,
     val accessToken: String,
     val refreshToken: String,
     val accessExpiresIn: Long,
