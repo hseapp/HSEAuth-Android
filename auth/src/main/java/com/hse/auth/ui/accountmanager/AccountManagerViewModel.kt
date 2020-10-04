@@ -183,11 +183,12 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                             val accountData = UserAccountData(
                                 email = userEmail,
                                 accessToken = tokensResult.accessToken,
-                                refreshToken = tokensResult.refreshToken!!,
+                                refreshToken = tokensResult.refreshToken
+                                    ?: userAccountData.refreshToken,
                                 avatartUrl = meEntity.avatarUrl,
                                 fullName = meEntity.fullName,
                                 accessExpiresIn = DateTime().millis + tokensResult.accessExpiresIn * 1000,
-                                refreshExpiresIn = DateTime().millis + tokensResult.refreshExpiresIn * 1000
+                                refreshExpiresIn = if (tokensResult.refreshToken != null) DateTime().millis + tokensResult.refreshExpiresIn * 1000 else userAccountData.refreshExpiresIn
                             )
                             _userAccountLiveData.postValue(accountData)
                             _loginWithSelectedAccount.postValue(accountData)

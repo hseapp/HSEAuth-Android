@@ -90,6 +90,11 @@ class WebViewCredentialsFragment :
                 requireContext().getRedirectUri()
             )
         } ?: run {
+            val isFirstAccount =
+                AccountManager.get(requireContext())
+                    .accounts
+                    .find { it.type == getString(R.string.ru_hseid_acc_type) } == null
+
             val uriBuilder = Uri.Builder()
                 .scheme(AUTH_SCHEME)
                 .authority(AUTH_BASE_URL)
@@ -98,11 +103,15 @@ class WebViewCredentialsFragment :
                 .appendPath(AUTH_PATH_AUTHORIZE)
                 .appendQueryParameter(KEY_CLIENT_ID, context?.getClientId())
                 .appendQueryParameter(KEY_RESPONSE_TYPE, RESPONSE_TYPE)
-                .appendQueryParameter(AUTH_PROMPT, PROMPT)
+
                 .appendQueryParameter(KEY_REDIRECT_URI, context?.getRedirectUri())
 
             arguments?.getParcelable<UserAccountData>(KEY_USER_ACCOUNT_DATA)?.let {
                 uriBuilder.appendQueryParameter(AUTH_LOGIN_HINT, it.email)
+            }
+
+            if (isFirstAccount.not()) {
+                uriBuilder.appendQueryParameter(AUTH_PROMPT, PROMPT)
             }
 
             val uri = uriBuilder.build()
