@@ -145,14 +145,19 @@ class WebViewCredentialsFragment :
                 putString(KEY_FULL_NAME, it.fullName.toString())
             }
             val am = AccountManager.get(context)
-            am.removeAccount(
-                account,
-                { _ ->
-                    am.addAccountExplicitly(account, "", userData)
-                    am.setAuthToken(account, account.type, it.accessToken)
-                },
-                Handler(Looper.getMainLooper())
-            )
+            if (am.accounts.find { acc -> acc.name == account.name } != null) {
+                am.removeAccount(
+                    account,
+                    { _ ->
+                        am.addAccountExplicitly(account, "", userData)
+                        am.setAuthToken(account, account.type, it.accessToken)
+                    },
+                    Handler(Looper.getMainLooper())
+                )
+            } else {
+                am.addAccountExplicitly(account, "", userData)
+                am.setAuthToken(account, account.type, it.accessToken)
+            }
         })
 
         viewModel.closeWithoutResult.observe(viewLifecycleOwner, Observer {
