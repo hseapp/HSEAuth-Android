@@ -146,14 +146,26 @@ class WebViewCredentialsFragment :
             }
             val am = AccountManager.get(context)
             if (am.accounts.find { acc -> acc.name == account.name } != null) {
-                am.removeAccount(
-                    account,
-                    { _ ->
-                        am.addAccountExplicitly(account, "", userData)
-                        am.setAuthToken(account, account.type, it.accessToken)
-                    },
-                    Handler(Looper.getMainLooper())
-                )
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    am.removeAccount(
+                        account,
+                        requireActivity(),
+                        { future ->
+                            am.addAccountExplicitly(account, "", userData)
+                            am.setAuthToken(account, account.type, it.accessToken)
+                        },
+                        Handler(Looper.getMainLooper())
+                    )
+                } else {
+                    am.removeAccount(
+                        account,
+                        { _ ->
+                            am.addAccountExplicitly(account, "", userData)
+                            am.setAuthToken(account, account.type, it.accessToken)
+                        },
+                        Handler(Looper.getMainLooper())
+                    )
+                }
             } else {
                 am.addAccountExplicitly(account, "", userData)
                 am.setAuthToken(account, account.type, it.accessToken)
