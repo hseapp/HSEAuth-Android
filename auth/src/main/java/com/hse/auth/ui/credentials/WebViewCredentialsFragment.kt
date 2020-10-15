@@ -1,13 +1,10 @@
 package com.hse.auth.ui.credentials
 
-import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,18 +24,15 @@ import com.hse.auth.utils.AuthConstants.AUTH_PATH_AUTHORIZE
 import com.hse.auth.utils.AuthConstants.AUTH_PATH_OAUTH
 import com.hse.auth.utils.AuthConstants.AUTH_PROMPT
 import com.hse.auth.utils.AuthConstants.AUTH_SCHEME
-import com.hse.auth.utils.AuthConstants.KEY_ACCESS_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_TOKEN
-import com.hse.auth.utils.AuthConstants.KEY_AVATAR_URL
 import com.hse.auth.utils.AuthConstants.KEY_CLIENT_ID
-import com.hse.auth.utils.AuthConstants.KEY_FULL_NAME
 import com.hse.auth.utils.AuthConstants.KEY_REDIRECT_URI
-import com.hse.auth.utils.AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
 import com.hse.auth.utils.AuthConstants.KEY_RESPONSE_TYPE
 import com.hse.auth.utils.AuthConstants.RESPONSE_TYPE
 import com.hse.auth.utils.getClientId
 import com.hse.auth.utils.getRedirectUri
+import com.hse.auth.utils.updateAccountManagerData
 import com.hse.core.common.BaseViewModelFactory
 import com.hse.core.ui.BaseFragment
 import javax.inject.Inject
@@ -135,42 +129,9 @@ class WebViewCredentialsFragment :
             }
         })
 
-        viewModel.userAccountLiveData.observe(viewLifecycleOwner, Observer {
-            val account = Account(it.email, getString(R.string.ru_hseid_acc_type))
-            val userData = Bundle().apply {
-                putString(KEY_REFRESH_TOKEN, it.refreshToken)
-                putString(KEY_ACCESS_EXPIRES_IN_MILLIS, it.accessExpiresIn.toString())
-                putString(KEY_REFRESH_EXPIRES_IN_MILLIS, it.refreshExpiresIn.toString())
-                putString(KEY_AVATAR_URL, it.avatartUrl.toString())
-                putString(KEY_FULL_NAME, it.fullName.toString())
-            }
-            val am = AccountManager.get(context)
-            if (am.accounts.find { acc -> acc.name == account.name } != null) {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    am.removeAccount(
-                        account,
-                        requireActivity(),
-                        { future ->
-                            am.addAccountExplicitly(account, "", userData)
-                            am.setAuthToken(account, account.type, it.accessToken)
-                        },
-                        Handler(Looper.getMainLooper())
-                    )
-                } else {
-                    am.removeAccount(
-                        account,
-                        { _ ->
-                            am.addAccountExplicitly(account, "", userData)
-                            am.setAuthToken(account, account.type, it.accessToken)
-                        },
-                        Handler(Looper.getMainLooper())
-                    )
-                }
-            } else {
-                am.addAccountExplicitly(account, "", userData)
-                am.setAuthToken(account, account.type, it.accessToken)
-            }
-        })
+        viewModel.userAccountLiveData.observe(
+            viewLifecycleOwner,
+            Observer { it.updateAccountManagerData(requireActivity()) })
 
         viewModel.closeWithoutResult.observe(viewLifecycleOwner, Observer {
             if (it) {

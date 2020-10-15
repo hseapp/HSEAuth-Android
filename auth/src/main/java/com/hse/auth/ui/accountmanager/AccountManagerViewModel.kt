@@ -12,6 +12,7 @@ import com.hse.auth.ui.models.UserAccountData
 import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_AVATAR_URL
+import com.hse.auth.utils.AuthConstants.KEY_CLIENT_ID
 import com.hse.auth.utils.AuthConstants.KEY_FULL_NAME
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
@@ -38,7 +39,6 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, "${throwable.message}")
-//        _error.postValue(throwable)
     }
 
     private val _userAccountsLiveData: MutableLiveData<List<UserAccountData>> = MutableLiveData()
@@ -93,6 +93,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                     accountManager.getUserData(acc, KEY_REFRESH_EXPIRES_IN_MILLIS).toLong()
                 val fullName = accountManager.getUserData(acc, KEY_FULL_NAME)
                 val avatarUrl = accountManager.getUserData(acc, KEY_AVATAR_URL)
+                val clientId = accountManager.getUserData(acc, KEY_CLIENT_ID)
 
                 this@AccountManagerViewModel.refreshToken = refreshToken
                 Log.i(TAG, "Data from acc manager\nToken\n$token\nRefreshToken\n$refreshToken")
@@ -110,7 +111,8 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                                     token,
                                     refreshToken,
                                     accessExpiresIn,
-                                    refreshExpiresIn
+                                    refreshExpiresIn,
+                                    clientId
                                 )
                             )
                             Log.i(TAG, "Successful got user data with token from acc manager")
@@ -124,7 +126,8 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                             token,
                             refreshToken,
                             accessExpiresIn,
-                            refreshExpiresIn
+                            refreshExpiresIn,
+                            clientId
                         )
                     )
                 }
@@ -160,7 +163,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
             if (userAccountData.refreshExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
                 val tokensResult = RefreshTokenRequest(
                     clientId = clientId,
-                    refreshToken = refreshToken
+                    refreshToken = userAccountData.refreshToken
                 ).run(network)
 
                 if (tokensResult != null) {
@@ -188,7 +191,8 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                                 avatartUrl = meEntity.avatarUrl,
                                 fullName = meEntity.fullName,
                                 accessExpiresIn = DateTime().millis + tokensResult.accessExpiresIn * 1000,
-                                refreshExpiresIn = if (tokensResult.refreshToken != null) DateTime().millis + tokensResult.refreshExpiresIn * 1000 else userAccountData.refreshExpiresIn
+                                refreshExpiresIn = if (tokensResult.refreshToken != null) DateTime().millis + tokensResult.refreshExpiresIn * 1000 else userAccountData.refreshExpiresIn,
+                                clientId = userAccountData.clientId
                             )
                             _userAccountLiveData.postValue(accountData)
                             _loginWithSelectedAccount.postValue(accountData)
