@@ -7,8 +7,8 @@ import com.hse.auth.utils.fromJson
 import com.hse.network.Request
 
 class RefreshTokenRequest(
-    private val clientId: String,
-    private val refreshToken: String
+    clientId: String,
+    refreshToken: String
 ) : Request<TokensModel>("https://auth.hse.ru/adfs/oauth2/token") {
 
     init {

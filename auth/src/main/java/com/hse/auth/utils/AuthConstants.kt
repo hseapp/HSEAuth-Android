@@ -30,9 +30,9 @@ object AuthConstants {
     internal const val KEY_AVATAR_URL = "avatar_url"
     internal const val KEY_FULL_NAME = "full_name"
 
+    //Acc manager data keys
     const val KEY_ACCESS_EXPIRES_IN_MILLIS = "access_expires_in"
     const val KEY_REFRESH_EXPIRES_IN_MILLIS = "refresh_expires_in"
     const val KEY_ACCESS_TOKEN = "access_token"
     const val KEY_REFRESH_TOKEN = "refresh_token"
-
 }

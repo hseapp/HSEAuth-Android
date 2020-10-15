@@ -1,6 +1,5 @@
 package com.hse.auth.ui.accountmanager
 
-import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
@@ -21,6 +20,7 @@ import com.hse.auth.ui.credentials.WebViewCredentialsFragment
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_TOKEN
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
 import com.hse.auth.utils.getClientId
+import com.hse.auth.utils.updateAccountManagerData
 import com.hse.core.common.BaseViewModelFactory
 import com.hse.core.common.activity
 import com.hse.core.common.onClick
@@ -86,14 +86,10 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
             setLoadingState(it)
         })
 
-        viewModel.userAccountLiveData.observe(viewLifecycleOwner, Observer {
-            val account = Account(it.email, getString(R.string.ru_hseid_acc_type))
-            val userData = Bundle().apply {
-                putString(KEY_REFRESH_TOKEN, it.refreshToken)
-            }
-            am.addAccountExplicitly(account, "", userData)
-            am.setAuthToken(account, account.type, it.accessToken)
-        })
+        viewModel.userAccountLiveData.observe(
+            viewLifecycleOwner,
+            Observer { it.updateAccountManagerData(requireActivity()) }
+        )
 
         viewModel.loginWithSelectedAccount.observe(viewLifecycleOwner, Observer { userData ->
             activity?.let {

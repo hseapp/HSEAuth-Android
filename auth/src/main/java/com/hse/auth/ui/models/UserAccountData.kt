@@ -11,5 +11,6 @@ data class UserAccountData(
     val accessToken: String,
     val refreshToken: String,
     val accessExpiresIn: Long,
-    val refreshExpiresIn: Long
+    val refreshExpiresIn: Long,
+    val clientId: String
 ): Parcelable

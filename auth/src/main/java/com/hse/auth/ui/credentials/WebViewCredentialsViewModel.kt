@@ -66,7 +66,8 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
                             avatartUrl = meEntity.avatarUrl,
                             fullName = meEntity.fullName,
                             accessExpiresIn = DateTime().millis + tokensResult.accessExpiresIn * 1000,
-                            refreshExpiresIn = DateTime().millis + tokensResult.refreshExpiresIn * 1000
+                            refreshExpiresIn = DateTime().millis + tokensResult.refreshExpiresIn * 1000,
+                            clientId = clientId
                         )
 
                         _userAccountLiveData.postValue(accountData)
