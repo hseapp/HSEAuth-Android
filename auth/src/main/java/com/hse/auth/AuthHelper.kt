@@ -2,22 +2,16 @@ package com.hse.auth
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import com.hse.auth.ui.LoginActivity
-import com.hse.auth.ui.LoginBottomSheet
 import com.hse.auth.utils.AuthConstants
-import com.hse.auth.utils.Mode
 import com.hse.auth.utils.getClientId
 import com.hse.auth.utils.getRedirectUri
 import com.hse.core.BaseApplication
 
 object AuthHelper {
 
-    fun login(activity: Activity, mode: Mode, requestCode: Int) {
-        when (mode) {
-            Mode.MODAL -> LoginBottomSheet(activity, requestCode).show()
-            else -> LoginActivity.launch(activity, mode, requestCode)
-        }
+    fun login(activity: Activity, requestCode: Int) {
+        LoginActivity.launch(activity, requestCode)
     }
 
     fun onNewIntent(intent: Intent?, activity: Activity, requestCode: Int) {
