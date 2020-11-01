@@ -11,7 +11,6 @@ import com.hse.auth.R
 import com.hse.auth.ui.accountmanager.AccountManagerFragment
 import com.hse.auth.ui.credentials.WebViewCredentialsFragment
 import com.hse.auth.utils.AuthConstants
-import com.hse.auth.utils.Mode
 import com.hse.core.navigation.Navigation
 import com.hse.core.navigation.NavigationCallback
 import com.hse.core.ui.BaseActivity
@@ -20,7 +19,6 @@ import kotlinx.android.synthetic.main.activity_login.*
 import net.danlew.android.joda.JodaTimeAndroid
 
 class LoginActivity : BaseActivity(), NavigationCallback {
-    private val mode = Mode.BASIC
 
     lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
@@ -50,12 +48,7 @@ class LoginActivity : BaseActivity(), NavigationCallback {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
-    private fun getRootTag(): String {
-        return when (mode) {
-            Mode.BASIC -> WebViewCredentialsFragment.TAG
-            else -> ""
-        }
-    }
+    private fun getRootTag(): String = "LoginActivity"
 
     private fun getRootFragment(): BaseFragment<*> {
         val am = AccountManager.get(this)
@@ -93,12 +86,10 @@ class LoginActivity : BaseActivity(), NavigationCallback {
     companion object {
         fun launch(
             context: Activity,
-            mode: Mode = Mode.BASIC,
             requestCode: Int,
             loginCode: String? = null
         ) {
             context.startActivityForResult(Intent(context, LoginActivity::class.java).apply {
-                putExtra("mode", mode)
                 loginCode?.let {
                     putExtra(AuthConstants.KEY_CODE, loginCode)
                 }
