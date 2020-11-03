@@ -3,14 +3,7 @@
 
     <string name="ru_hseid_acc_type" translatable="false">ru.hseapp.acc</string>
 
-    <string name="email">Адрес электронной почты</string>
-    <string name="password">Пароль</string>
-    <string name="login_with_hse_id">Войти через HSE ID</string>
-    <string name="wrong_credentials">Неверный логин или пароль</string>
-    <string name="login_to_your_account">Войдите в свой аккаунт</string>
-    <string name="login_to_your_account_descr">Единый вход для всех мобильных приложений Вышки через корпоративный аккаунт</string>
-
     <string name="acc_manager_continue_with_placeholder">Продолжить как %s</string>
     <string name="acc_manager_new_login">Войти в другой аккаунт</string>
-    <string name="continue_as">Продолжить как:</string>
+    <string name="error_happened">Произошла ошибка</string>
 </resources>
