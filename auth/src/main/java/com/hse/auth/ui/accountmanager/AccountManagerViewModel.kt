@@ -38,7 +38,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
     }
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, "ExceptionHandler: ${throwable.message}")
+        Log.e(TAG, "ExceptionHandler: ${throwable.message} in ${throwable.cause}; $throwable")
     }
 
     private val _userAccountsLiveData: MutableLiveData<List<UserAccountData>> = MutableLiveData()
@@ -165,6 +165,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
             Log.i(TAG, "Try refresh token")
             //Рефреш не протух
             if (userAccountData.refreshExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
+                Log.i(TAG, "Refresh is fresh")
                 val tokensResult = RefreshTokenRequest(
                     clientId = clientId,
                     refreshToken = userAccountData.refreshToken
