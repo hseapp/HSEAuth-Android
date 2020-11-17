@@ -38,7 +38,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
     }
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, "${throwable.message}")
+        Log.e(TAG, "ExceptionHandler: ${throwable.message}")
     }
 
     private val _userAccountsLiveData: MutableLiveData<List<UserAccountData>> = MutableLiveData()
@@ -148,10 +148,13 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
     }
 
     fun onAccountClicked(userAccountData: UserAccountData) {
+        Log.i(TAG, "OnAccountClicked")
         //Токен не протух
         if (userAccountData.accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
+            Log.i(TAG, "Access token is fresh")
             _loginWithSelectedAccount.value = userAccountData
         } else {//протух, пробуем зарефрешить
+            Log.i(TAG, "Access token is out of date")
             refreshAccessToken(userAccountData)
         }
     }
@@ -159,6 +162,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
     private fun refreshAccessToken(userAccountData: UserAccountData) =
         viewModelScope.launch(Dispatchers.IO + exceptionsHandler) {
 
+            Log.i(TAG, "Try refresh token")
             //Рефреш не протух
             if (userAccountData.refreshExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
                 val tokensResult = RefreshTokenRequest(
@@ -199,6 +203,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                         }
                 }
             } else {//рефреш протух, полный перелогин
+                Log.i(TAG, "refresh is out of date")
                 _reloginWithSelectedAccount.postValue(userAccountData)
             }
         }
