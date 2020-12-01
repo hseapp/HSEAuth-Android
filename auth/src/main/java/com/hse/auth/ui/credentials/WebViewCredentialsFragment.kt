@@ -185,16 +185,6 @@ class WebViewCredentialsFragment :
         })
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     class Builder : BaseFragment.Builder(WebViewCredentialsFragment::class.java) {
         fun addUserAccountData(userAccountData: UserAccountData): Builder {
             arguments.putParcelable(KEY_USER_ACCOUNT_DATA, userAccountData)

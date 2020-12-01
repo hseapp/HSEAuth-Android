@@ -77,13 +77,4 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
         }
     }
 
-    fun onPause() {
-        wasPaused = true
-    }
-
-    fun onResume() {
-        if (wasPaused){
-            _closeWithoutResult.value = true
-        }
-    }
 }
