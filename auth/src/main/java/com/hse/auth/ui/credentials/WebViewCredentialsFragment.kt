@@ -3,12 +3,13 @@ package com.hse.auth.ui.credentials
 import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.browser.customtabs.CustomTabsIntent
+import android.webkit.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -34,7 +35,10 @@ import com.hse.auth.utils.getClientId
 import com.hse.auth.utils.getRedirectUri
 import com.hse.auth.utils.updateAccountManagerData
 import com.hse.core.common.BaseViewModelFactory
+import com.hse.core.common.setGone
+import com.hse.core.common.setVisible
 import com.hse.core.ui.BaseFragment
+import kotlinx.android.synthetic.main.fragment_web_auth.*
 import javax.inject.Inject
 
 
@@ -57,6 +61,7 @@ class WebViewCredentialsFragment :
 
     @Inject
     lateinit var viewModelFactory: BaseViewModelFactory
+    private var redirectUrl: String? = null
 
     override fun getFragmentTag(): String = TAG
 
@@ -76,7 +81,58 @@ class WebViewCredentialsFragment :
         ).get(WebViewCredentialsViewModel::class.java)
     }
 
+    private inner class WebClient : WebViewClient() {
+        override fun shouldOverrideUrlLoading(
+            view: WebView?,
+            request: WebResourceRequest?
+        ): Boolean {
+            return false
+        }
+
+        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+            super.onPageStarted(view, url, favicon)
+
+        }
+        override fun onPageFinished(view: WebView?, url: String?) {
+            progress_bar?.setGone()
+            web_view?.setVisible()
+            url ?: return
+            val sbstr = url.indexOf('?')
+            if (sbstr > 0) {
+                val u = url.substring(0, sbstr)
+                if (u == redirectUrl) {
+                    val uri = Uri.parse(url)
+                    uri?.getQueryParameter(AuthConstants.KEY_CODE)?.let { code ->
+                        web_view?.setGone()
+                        progress_bar?.setVisible()
+                        viewModel.onCodeLoaded(
+                            code,
+                            requireContext().getClientId(),
+                            requireContext().getRedirectUri()
+                        )
+//                        LoginActivity.launch(activity, requestCode = requestCode, loginCode = code)
+                    }
+                }
+            }
+        }
+
+    }
+
+    private inner class ChromeWebClient : WebChromeClient()
+
+    private fun initWbView() {
+        CookieManager.getInstance().setAcceptCookie(true)
+        web_view?.let {
+            it.settings?.javaScriptEnabled = true
+            it.webViewClient = WebClient()
+            it.webChromeClient = ChromeWebClient()
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initWbView()
+        redirectUrl = context?.getRedirectUri()
+
         arguments?.getString(AuthConstants.KEY_CODE)?.let { code ->
             viewModel.onCodeLoaded(
                 code,
@@ -97,7 +153,6 @@ class WebViewCredentialsFragment :
                 .appendPath(AUTH_PATH_AUTHORIZE)
                 .appendQueryParameter(KEY_CLIENT_ID, context?.getClientId())
                 .appendQueryParameter(KEY_RESPONSE_TYPE, RESPONSE_TYPE)
-
                 .appendQueryParameter(KEY_REDIRECT_URI, context?.getRedirectUri())
 
             arguments?.getParcelable<UserAccountData>(KEY_USER_ACCOUNT_DATA)?.let {
@@ -109,13 +164,14 @@ class WebViewCredentialsFragment :
             }
 
             val uri = uriBuilder.build()
+            web_view?.loadUrl(uri.toString())
 
-            val builder = CustomTabsIntent.Builder()
-            val customTabsIntent = builder.build()
-            customTabsIntent.launchUrl(
-                requireContext(),
-                uri
-            )
+//            val builder = CustomTabsIntent.Builder()
+//            val customTabsIntent = builder.build()
+//            customTabsIntent.launchUrl(
+//                requireContext(),
+//                uri
+//            )
         }
 
         viewModel.tokensResultLiveData.observe(viewLifecycleOwner, Observer { model ->
