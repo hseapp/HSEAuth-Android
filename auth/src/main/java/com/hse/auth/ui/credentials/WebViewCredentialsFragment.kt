@@ -89,18 +89,13 @@ class WebViewCredentialsFragment :
             return false
         }
 
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            super.onPageStarted(view, url, favicon)
-
-        }
         override fun onPageFinished(view: WebView?, url: String?) {
             progress_bar?.setGone()
             web_view?.setVisible()
             url ?: return
             val sbstr = url.indexOf('?')
-            if (sbstr > 0) {
-                val u = url.substring(0, sbstr)
-                if (u == redirectUrl) {
+            if (sbstr > 0 && sbstr < url.length) {
+                if (url.substring(0, sbstr) == redirectUrl) {
                     val uri = Uri.parse(url)
                     uri?.getQueryParameter(AuthConstants.KEY_CODE)?.let { code ->
                         web_view?.setGone()
@@ -110,7 +105,6 @@ class WebViewCredentialsFragment :
                             requireContext().getClientId(),
                             requireContext().getRedirectUri()
                         )
-//                        LoginActivity.launch(activity, requestCode = requestCode, loginCode = code)
                     }
                 }
             }
@@ -118,14 +112,13 @@ class WebViewCredentialsFragment :
 
     }
 
-    private inner class ChromeWebClient : WebChromeClient()
 
     private fun initWbView() {
         CookieManager.getInstance().setAcceptCookie(true)
         web_view?.let {
             it.settings?.javaScriptEnabled = true
             it.webViewClient = WebClient()
-            it.webChromeClient = ChromeWebClient()
+            it.webChromeClient = WebChromeClient()
         }
     }
 
@@ -165,13 +158,6 @@ class WebViewCredentialsFragment :
 
             val uri = uriBuilder.build()
             web_view?.loadUrl(uri.toString())
-
-//            val builder = CustomTabsIntent.Builder()
-//            val customTabsIntent = builder.build()
-//            customTabsIntent.launchUrl(
-//                requireContext(),
-//                uri
-//            )
         }
 
         viewModel.tokensResultLiveData.observe(viewLifecycleOwner, Observer { model ->
