@@ -35,6 +35,8 @@ import com.hse.auth.utils.getClientId
 import com.hse.auth.utils.getRedirectUri
 import com.hse.auth.utils.updateAccountManagerData
 import com.hse.core.common.BaseViewModelFactory
+import com.hse.core.common.setGone
+import com.hse.core.common.setVisible
 import com.hse.core.ui.BaseFragment
 import kotlinx.android.synthetic.main.fragment_web_auth.*
 import javax.inject.Inject
