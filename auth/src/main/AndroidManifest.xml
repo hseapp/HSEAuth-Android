@@ -9,7 +9,9 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application>
-        <activity android:name=".ui.LoginActivity" android:theme="@style/Theme.Transparent"/>
+        <activity android:name=".ui.LoginActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.Transparent"/>
 
         <service android:name=".accountmanager.AuthService">
             <intent-filter>

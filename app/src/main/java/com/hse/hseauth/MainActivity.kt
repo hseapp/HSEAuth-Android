@@ -21,11 +21,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        AuthHelper.onNewIntent(intent, this, 1)
-        super.onNewIntent(intent)
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
