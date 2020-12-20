@@ -1,5 +1,6 @@
 package com.hse.auth.ui.credentials
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,8 @@ import com.hse.auth.utils.AuthConstants
 import com.hse.core.enums.LoadingState
 import com.hse.core.viewmodels.BaseViewModel
 import com.hse.network.Network
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.joda.time.DateTime
 import javax.inject.Inject
@@ -19,6 +22,11 @@ import javax.inject.Inject
 class WebViewCredentialsViewModel @Inject constructor(private val network: Network) :
     BaseViewModel() {
     override val loadingState: MutableLiveData<LoadingState>? = null
+
+    private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
+        Log.e(TAG, "ExceptionHandler: ${throwable.message} in ${throwable.cause}; $throwable")
+        _error.postValue(throwable)
+    }
 
     private val _tokensResultLiveData = MutableLiveData<TokensModel>()
     val tokensResultLiveData: LiveData<TokensModel>
@@ -32,14 +40,22 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
     val closeWithoutResult: LiveData<Boolean>
         get() = _closeWithoutResult
 
+    private val _error: MutableLiveData<Throwable> = MutableLiveData()
+    val error: LiveData<Throwable>
+        get() = _error
+
     private var wasPaused = false
+
+    companion object {
+        private const val TAG = "WebViewCredentialsVM"
+    }
 
     fun onCodeLoaded(
         code: String,
         clientId: String,
         redirectUri: String
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO + exceptionsHandler) {
             val tokensResult = TokenRequest(
                 code,
                 clientId = clientId,

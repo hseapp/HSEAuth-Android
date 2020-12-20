@@ -8,10 +8,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.snackbar.Snackbar
 import com.hse.auth.R
 import com.hse.auth.di.AuthComponentProvider
 import com.hse.auth.ui.LoginActivity
@@ -140,6 +142,11 @@ class WebViewCredentialsFragment :
                     finish()
                 }
             }
+        })
+
+        viewModel.error.observe(viewLifecycleOwner, Observer {
+            Toast.makeText(requireContext(), R.string.error_happened, Toast.LENGTH_SHORT).show()
+            activity?.finish()
         })
     }
 
