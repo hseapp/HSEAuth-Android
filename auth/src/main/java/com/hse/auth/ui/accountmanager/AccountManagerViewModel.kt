@@ -96,11 +96,11 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
                 val clientId = accountManager.getUserData(acc, KEY_CLIENT_ID)
 
                 this@AccountManagerViewModel.refreshToken = refreshToken
-                Log.i(TAG, "Data from acc manager\nToken\n$token\nRefreshToken\n$refreshToken")
+                Log.i(TAG, "Data from acc manager")
 
                 //Токен не протух
                 if (accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
-                    Log.i(TAG, "Try for get user for \n$token")
+                    Log.i(TAG, "Try for get user for token")
                     GetMeRequest(token).run(network)
                         ?.let { meEntity ->
                             accountsDataList.add(
