@@ -1,11 +1,14 @@
 package com.hse.auth.ui.accountmanager
 
 import android.accounts.AccountManager
+import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.hse.auth.requests.GetMeRequest
 import com.hse.auth.requests.RefreshTokenRequest
 import com.hse.auth.ui.models.UserAccountData
@@ -23,13 +26,13 @@ import kotlinx.coroutines.*
 import org.joda.time.DateTime
 import javax.inject.Inject
 
-class AccountManagerViewModel @Inject constructor(val network: Network) :
+class AccountManagerViewModel @Inject constructor(val network: Network, val context: Context) :
     BaseViewModel() {
     override val loadingState = MutableLiveData<LoadingState>()
 
     companion object {
         private const val TAG = "AccountManagerVM"
-        private const val TOKEN_EXPIRED_ERROR_MESSAGE = "TokenExpiredError"
+        private const val KEY_ERROR = "key_error"
 
         //Минимальное значение времени, которое токен ещё должен быть жив после проверки
         //То есть чтобы он не был протухшим сразу после проверки, а был жив хотя бы 10 секунд
@@ -38,7 +41,10 @@ class AccountManagerViewModel @Inject constructor(val network: Network) :
     }
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, "ExceptionHandler: ${throwable.message} in ${throwable.cause}; $throwable")
+        val data = Bundle().apply {
+            putString(KEY_ERROR, throwable.message ?: "empty")
+        }
+        FirebaseAnalytics.getInstance(context).logEvent("AuthHandledException", data)
     }
 
     private val _userAccountsLiveData: MutableLiveData<List<UserAccountData>> = MutableLiveData()

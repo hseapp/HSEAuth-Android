@@ -1,10 +1,13 @@
 package com.hse.auth.ui.credentials
 
+import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.hse.auth.models.TokensModel
 import com.hse.auth.requests.GetMeRequest
 import com.hse.auth.requests.TokenRequest
@@ -19,12 +22,19 @@ import kotlinx.coroutines.launch
 import org.joda.time.DateTime
 import javax.inject.Inject
 
-class WebViewCredentialsViewModel @Inject constructor(private val network: Network) :
+class WebViewCredentialsViewModel @Inject constructor(
+    private val network: Network,
+    private val context: Context
+) :
     BaseViewModel() {
     override val loadingState: MutableLiveData<LoadingState>? = null
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, "ExceptionHandler: ${throwable.message} in ${throwable.cause}; $throwable")
+        val data = Bundle().apply {
+            putString(KEY_ERROR, throwable.message ?: "empty")
+        }
+        FirebaseAnalytics.getInstance(context).logEvent("AuthHandledException", data)
         _error.postValue(throwable)
     }
 
@@ -48,6 +58,7 @@ class WebViewCredentialsViewModel @Inject constructor(private val network: Netwo
 
     companion object {
         private const val TAG = "WebViewCredentialsVM"
+        private const val KEY_ERROR = "key_error"
     }
 
     fun onCodeLoaded(
