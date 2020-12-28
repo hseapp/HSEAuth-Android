@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "368381532397",
+    "project_id": "hsefkingauth",
+    "storage_bucket": "hsefkingauth.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368381532397:android:3c2397ac3b541742d494e4",
+        "android_client_info": {
+          "package_name": "com.hse.hseauth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "368381532397-43f011kjpmkhqu2kdb60bgp23tbnjare.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKi3Sz9b7Hp6bz9WcR3CxSUEq-StUJBzg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "368381532397-43f011kjpmkhqu2kdb60bgp23tbnjare.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
