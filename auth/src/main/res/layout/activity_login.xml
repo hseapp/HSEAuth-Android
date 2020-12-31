@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@color/black_33pc">
+    android:background="@color/auth_black_33pc">
 
     <FrameLayout
         android:id="@+id/bottomSheet"
@@ -29,6 +29,6 @@
             android:clipToPadding="false"
             android:gravity="bottom"
             android:orientation="vertical"
-            android:backgroundTint="@color/white_to_black"/>
+            android:backgroundTint="@color/auth_white_to_black"/>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
