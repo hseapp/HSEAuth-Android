@@ -58,7 +58,7 @@ dependencies {
     implementation 'com.auth0.android:jwtdecode:2.0.0'
 
     implementation 'com.github.hseapp:HseNetwork-Android:1.0.3'
-    implementation 'com.github.hseapp:HSECore-Android:0.7.1'
+    implementation 'com.github.hseapp:HSECore-Android:0.7.8'
 
     implementation 'net.danlew:android.joda:2.10.6.1'
 
