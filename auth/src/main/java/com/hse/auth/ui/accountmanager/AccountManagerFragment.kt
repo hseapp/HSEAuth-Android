@@ -115,7 +115,6 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
         })
 
         loginWithNewAccBtn.onClick {
-            throw RuntimeException("Fake error/crash")
             viewModel.onNewAccLoginClick()
         }
     }
