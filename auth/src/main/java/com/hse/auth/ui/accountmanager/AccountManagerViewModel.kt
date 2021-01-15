@@ -2,13 +2,12 @@ package com.hse.auth.ui.accountmanager
 
 import android.accounts.AccountManager
 import android.content.Context
-import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
-import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.hse.auth.requests.GetMeRequest
 import com.hse.auth.requests.RefreshTokenRequest
 import com.hse.auth.ui.models.UserAccountData
@@ -41,10 +40,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
     }
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
-        val data = Bundle().apply {
-            putString(KEY_ERROR, throwable.message ?: "empty")
-        }
-        FirebaseAnalytics.getInstance(context).logEvent("AuthHandledException", data)
+        FirebaseCrashlytics.getInstance().recordException(throwable)
     }
 
     private val _userAccountsLiveData: MutableLiveData<List<UserAccountData>> = MutableLiveData()
