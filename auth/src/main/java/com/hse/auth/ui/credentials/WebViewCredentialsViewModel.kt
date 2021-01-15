@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
-import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.hse.auth.models.TokensModel
 import com.hse.auth.requests.GetMeRequest
 import com.hse.auth.requests.TokenRequest
@@ -31,10 +31,7 @@ class WebViewCredentialsViewModel @Inject constructor(
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, "ExceptionHandler: ${throwable.message} in ${throwable.cause}; $throwable")
-        val data = Bundle().apply {
-            putString(KEY_ERROR, throwable.message ?: "empty")
-        }
-        FirebaseAnalytics.getInstance(context).logEvent("AuthHandledException", data)
+        FirebaseCrashlytics.getInstance().recordException(throwable)
         _error.postValue(throwable)
     }
 
