@@ -40,6 +40,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
     }
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
+        loadingState.postValue(LoadingState.ERROR)
         FirebaseCrashlytics.getInstance().recordException(throwable)
     }
 
@@ -164,6 +165,8 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
     private fun refreshAccessToken(userAccountData: UserAccountData) =
         viewModelScope.launch(Dispatchers.IO + exceptionsHandler) {
 
+            loadingState.postValue(LoadingState.LOADING)
+
             Log.i(TAG, "Try refresh token")
             //Рефреш не протух
             if (userAccountData.refreshExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
@@ -209,5 +212,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                 Log.i(TAG, "refresh is out of date")
                 _reloginWithSelectedAccount.postValue(userAccountData)
             }
+
+            loadingState.postValue(LoadingState.DONE)
         }
 }
