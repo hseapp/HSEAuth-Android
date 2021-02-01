@@ -129,6 +129,7 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
             loginWithNewAccBtn.isVisible = true
         }
         LoadingState.ERROR -> {
+            Toast.makeText(requireContext(), R.string.error_happened, Toast.LENGTH_SHORT).show()
             loadingPb.isVisible = false
         }
         else -> {
