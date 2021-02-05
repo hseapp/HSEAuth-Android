@@ -121,18 +121,22 @@ class AccountManagerFragment : BaseFragment<AccountManagerViewModel>() {
 
     private fun setLoadingState(state: LoadingState) = when (state) {
         LoadingState.LOADING -> {
+            userAccountsRv.isVisible = false
             loadingPb.isVisible = true
             loginWithNewAccBtn.isVisible = false
         }
         LoadingState.DONE -> {
+            userAccountsRv.isVisible = true
             loadingPb.isVisible = false
             loginWithNewAccBtn.isVisible = true
         }
         LoadingState.ERROR -> {
+            userAccountsRv.isVisible = true
             Toast.makeText(requireContext(), R.string.error_happened, Toast.LENGTH_SHORT).show()
             loadingPb.isVisible = false
         }
         else -> {
+            userAccountsRv.isVisible = true
             loadingPb.isVisible = false
         }
     }
