@@ -87,5 +87,4 @@ private fun requestLogin(mode: Mode) {
 
 В зависимости от наличия данных в AccountManager откроется либо webView с авторизацией, либо можно будет зайти по тем данным, которые есть в AccountManger. В любом случае токены будут прилетать в onActivityResult()
 
-
-#### 6. TODO: about activity(singleTask) and about DI
+Пример реализации можно посмотреть в тестовом приложении репозитория.
