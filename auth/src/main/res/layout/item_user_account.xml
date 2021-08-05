@@ -14,15 +14,15 @@
         android:id="@+id/userAvatarCv"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#05000000"
         app:cardCornerRadius="33dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#05000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
         tools:visibility="visible">
 
         <ImageView
@@ -41,13 +41,14 @@
         android:layout_marginStart="12dp"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
         android:gravity="start"
         android:lines="1"
         android:text="Akbar Silovich ASlk;alksd;laksd;lkas;dlkasd"
         android:textColor="@color/auth_black_to_white"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/userAvatarCv"
-        android:textSize="17sp"
         app:layout_constraintTop_toTopOf="@id/userAvatarCv" />
 
     <TextView
@@ -58,7 +59,7 @@
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:lines="1"
-        android:textColor="@color/auth_gray"
+        android:textColor="@color/auth_light_blue"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@id/userAvatarCv"
         app:layout_constraintEnd_toEndOf="parent"
