@@ -6,6 +6,7 @@ import android.accounts.AccountAuthenticatorResponse
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import timber.log.Timber
 
 //Класс со всей логикой авторизацией и взаимодействием
 class Authenticator(val context: Context) : AbstractAccountAuthenticator(context) {
@@ -14,7 +15,7 @@ class Authenticator(val context: Context) : AbstractAccountAuthenticator(context
     }
 
     override fun getAuthTokenLabel(authTokenType: String?): String {
-        Log.i(TAG, "getAuthTokenLabel()")
+        Timber.i( "getAuthTokenLabel()")
         return "AuthTokenLabel"
     }
 
@@ -23,7 +24,7 @@ class Authenticator(val context: Context) : AbstractAccountAuthenticator(context
         account: Account?,
         options: Bundle?
     ): Bundle {
-        Log.i(TAG, "confirmCredentials()")
+        Timber.i( "confirmCredentials()")
         return Bundle()
     }
 
@@ -33,7 +34,7 @@ class Authenticator(val context: Context) : AbstractAccountAuthenticator(context
         authTokenType: String?,
         options: Bundle?
     ): Bundle {
-        Log.i(TAG, "updateCredentials()")
+        Timber.i( "updateCredentials()")
         return Bundle()
     }
 
@@ -51,7 +52,7 @@ class Authenticator(val context: Context) : AbstractAccountAuthenticator(context
         account: Account?,
         features: Array<out String>?
     ): Bundle {
-        Log.i(TAG, "hasFeatures()")
+        Timber.i( "hasFeatures()")
         return Bundle()
     }
 
@@ -59,7 +60,7 @@ class Authenticator(val context: Context) : AbstractAccountAuthenticator(context
         response: AccountAuthenticatorResponse?,
         accountType: String?
     ): Bundle {
-        Log.i(TAG, "editProperties()")
+        Timber.i( "editProperties()")
         return Bundle()
     }
 
@@ -70,7 +71,7 @@ class Authenticator(val context: Context) : AbstractAccountAuthenticator(context
         requiredFeatures: Array<out String>?,
         options: Bundle?
     ): Bundle {
-        Log.i(TAG, "addAccount()")
+        Timber.i( "addAccount()")
         return Bundle()
     }
 }

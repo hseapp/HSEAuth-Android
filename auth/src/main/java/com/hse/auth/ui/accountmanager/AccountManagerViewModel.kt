@@ -23,6 +23,7 @@ import com.hse.core.viewmodels.BaseViewModel
 import com.hse.network.Network
 import kotlinx.coroutines.*
 import org.joda.time.DateTime
+import timber.log.Timber
 import javax.inject.Inject
 
 class AccountManagerViewModel @Inject constructor(val network: Network, val context: Context) :
@@ -85,7 +86,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
         val accounts = accountManager.accounts.filter { it.type == accountType }
         loadingState.value = LoadingState.LOADING
         val accountsDataList = mutableListOf<UserAccountData>()
-        Log.i(TAG, "For start")
+        Timber.i("For start")
         accounts.forEach { acc ->
             viewModelScope.launch(Dispatchers.IO + exceptionsHandler) {
                 val token = accountManager.blockingGetAuthToken(acc, acc.type, true)
@@ -99,11 +100,11 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                 val clientId = accountManager.getUserData(acc, KEY_CLIENT_ID)
 
                 this@AccountManagerViewModel.refreshToken = refreshToken
-                Log.i(TAG, "Data from acc manager")
+                Timber.i("Data from acc manager")
 
                 //Токен не протух
                 if (accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
-                    Log.i(TAG, "Try for get user for token")
+                    Timber.i("Try for get user for token")
                     GetMeRequest(token).run(network)
                         ?.let { meEntity ->
                             accountsDataList.add(
@@ -118,7 +119,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                                     clientId
                                 )
                             )
-                            Log.i(TAG, "Successful got user data with token from acc manager")
+                            Timber.i( "Successful got user data with token from acc manager")
                         }
                 } else {// Протух
                     accountsDataList.add(
@@ -137,7 +138,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                 Unit
             }.join()
         }
-        Log.i(TAG, "For end")
+        Timber.i( "For end")
         _userAccountsLiveData.postValue(accountsDataList)
         loadingState.postValue(LoadingState.DONE)
     }
@@ -151,13 +152,13 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
     }
 
     fun onAccountClicked(userAccountData: UserAccountData) {
-        Log.i(TAG, "OnAccountClicked")
+        Timber.i( "OnAccountClicked")
         //Токен не протух
         if (userAccountData.accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
-            Log.i(TAG, "Access token is fresh")
+            Timber.i( "Access token is fresh")
             _loginWithSelectedAccount.value = userAccountData
         } else {//протух, пробуем зарефрешить
-            Log.i(TAG, "Access token is out of date")
+            Timber.i( "Access token is out of date")
             refreshAccessToken(userAccountData)
         }
     }
@@ -167,17 +168,17 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
 
             loadingState.postValue(LoadingState.LOADING)
 
-            Log.i(TAG, "Try refresh token")
+            Timber.i( "Try refresh token")
             //Рефреш не протух
             if (userAccountData.refreshExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
-                Log.i(TAG, "Refresh is fresh")
+                Timber.i( "Refresh is fresh")
                 val tokensResult = RefreshTokenRequest(
                     clientId = clientId,
                     refreshToken = userAccountData.refreshToken
                 ).run(network)
 
                 if (tokensResult != null) {
-                    Log.i(TAG, "Successfully refreshed")
+                    Timber.i( "Successfully refreshed")
                     var userEmail = ""
                     JWT(tokensResult.accessToken).getClaim(AuthConstants.KEY_EMAIL).asString()
                         ?.let {
@@ -209,7 +210,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                         }
                 }
             } else {//рефреш протух, полный перелогин
-                Log.i(TAG, "refresh is out of date")
+                Timber.i( "Refresh is out of date")
                 _reloginWithSelectedAccount.postValue(userAccountData)
             }
 

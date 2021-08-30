@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.joda.time.DateTime
+import timber.log.Timber
 import javax.inject.Inject
 
 class WebViewCredentialsViewModel @Inject constructor(
@@ -30,7 +31,7 @@ class WebViewCredentialsViewModel @Inject constructor(
     override val loadingState: MutableLiveData<LoadingState>? = null
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, "ExceptionHandler: ${throwable.message} in ${throwable.cause}; $throwable")
+        Timber.e("ExceptionHandler: ${throwable.message} in ${throwable.cause}; $throwable")
         FirebaseCrashlytics.getInstance().recordException(throwable)
         _error.postValue(throwable)
     }

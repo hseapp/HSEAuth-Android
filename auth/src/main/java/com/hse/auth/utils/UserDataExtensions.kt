@@ -15,6 +15,7 @@ import com.hse.auth.utils.AuthConstants.KEY_CLIENT_ID
 import com.hse.auth.utils.AuthConstants.KEY_FULL_NAME
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
+import timber.log.Timber
 
 fun UserAccountData.updateAccountManagerData(activity: Activity) {
     try {
@@ -54,6 +55,6 @@ fun UserAccountData.updateAccountManagerData(activity: Activity) {
             am.setAuthToken(account, account.type, accessToken)
         }
     } catch (e: Exception) {
-        Log.e("AccountManager", "Handled error: ${e.message}", e)
+        Timber.e(e)
     }
 }
