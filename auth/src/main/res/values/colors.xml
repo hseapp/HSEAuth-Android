@@ -2,7 +2,7 @@
 <resources>
     <color name="auth_black_33pc">#54000000</color>
     <color name="auth_black">#de000000</color>
-    <color name="auth_gray">#909499</color>
+    <color name="auth_light_blue">#6b7a99</color>
     <color name="auth_white_to_black">#fff</color>
     <color name="auth_black_to_white">#000</color>
 </resources>
