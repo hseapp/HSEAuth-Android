@@ -114,11 +114,18 @@ class WebViewCredentialsFragment :
 
 
     private fun initWbView() {
-        CookieManager.getInstance().setAcceptCookie(true)
+        CookieManager.getInstance().apply {
+            setAcceptCookie(false)
+            removeAllCookies(null)
+            removeSessionCookies(null)
+        }
         web_view?.let {
             it.settings?.javaScriptEnabled = true
             it.webViewClient = WebClient()
             it.webChromeClient = WebChromeClient()
+            it.clearCache(true)
+            it.clearHistory()
+            it.clearFormData()
         }
     }
 
