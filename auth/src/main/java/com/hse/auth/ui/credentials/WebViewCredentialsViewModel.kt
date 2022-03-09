@@ -1,21 +1,20 @@
 package com.hse.auth.ui.credentials
 
-import android.content.Context
-import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.hse.auth.models.MeDataEntity
 import com.hse.auth.models.TokensModel
-import com.hse.auth.requests.GetMeRequest
-import com.hse.auth.requests.TokenRequest
+import com.hse.auth.requests.ApiRequests
+import com.hse.auth.requests.AuthRequests
 import com.hse.auth.ui.models.UserAccountData
 import com.hse.auth.utils.AuthConstants
+import com.hse.auth.utils.safeResult
 import com.hse.core.enums.LoadingState
 import com.hse.core.viewmodels.BaseViewModel
-import com.hse.network.Network
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,8 +23,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class WebViewCredentialsViewModel @Inject constructor(
-    private val network: Network,
-    private val context: Context
+    private val apiRequests: ApiRequests,
+    private val authRequests: AuthRequests
 ) :
     BaseViewModel() {
     override val loadingState: MutableLiveData<LoadingState>? = null
@@ -65,11 +64,13 @@ class WebViewCredentialsViewModel @Inject constructor(
         redirectUri: String
     ) {
         viewModelScope.launch(Dispatchers.IO + exceptionsHandler) {
-            val tokensResult = TokenRequest(
-                code,
-                clientId = clientId,
-                redirectUri = redirectUri
-            ).run(network)
+            val tokensResult = safeResult<TokensModel> {
+                authRequests.getToken(
+                    code,
+                    clientId = clientId,
+                    uri = redirectUri
+                )
+            }
 
             if (tokensResult != null) {
                 var userEmail = ""
@@ -81,9 +82,8 @@ class WebViewCredentialsViewModel @Inject constructor(
                     userEmail = it
                 }
 
-                GetMeRequest(tokensResult.accessToken).run(network)
+                safeResult<MeDataEntity> { apiRequests.getMe(ApiRequests.getAuthHeader(tokensResult.accessToken)) }
                     ?.let { meEntity ->
-
                         val accountData = UserAccountData(
                             email = userEmail,
                             accessToken = tokensResult.accessToken,

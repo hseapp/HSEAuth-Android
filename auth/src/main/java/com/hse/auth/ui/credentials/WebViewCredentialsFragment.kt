@@ -74,7 +74,6 @@ class WebViewCredentialsFragment :
     override fun provideViewModel(): WebViewCredentialsViewModel {
         (activity?.applicationContext as? AuthComponentProvider)?.provideAuthComponent()
             ?.inject(this)
-
         return ViewModelProvider(
             this,
             viewModelFactory

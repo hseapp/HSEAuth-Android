@@ -6,13 +6,12 @@ import com.hse.auth.di.AuthModule
 import com.hse.core.di.AppModule
 import com.hse.core.di.BaseAppComponent
 import com.hse.core.di.CoreModule
-import com.hse.network.NetworkModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [AppModule::class, AuthModule::class, CoreModule::class, NetworkModule::class])
+@Component(modules = [AppModule::class, AuthModule::class, CoreModule::class])
 interface AppComponent : BaseAppComponent {
 
     fun inject(app: App)

@@ -8,7 +8,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
 
-@Module(subcomponents = [AuthComponent::class])
+@Module(subcomponents = [AuthComponent::class], includes = [RetrofitAuthModule::class])
 abstract class AuthModule {
 
     @Binds

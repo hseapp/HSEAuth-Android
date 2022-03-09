@@ -2,14 +2,15 @@ package com.hse.auth.ui.accountmanager
 
 import android.accounts.AccountManager
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.hse.auth.requests.GetMeRequest
-import com.hse.auth.requests.RefreshTokenRequest
+import com.hse.auth.models.MeDataEntity
+import com.hse.auth.models.TokensModel
+import com.hse.auth.requests.ApiRequests
+import com.hse.auth.requests.AuthRequests
 import com.hse.auth.ui.models.UserAccountData
 import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_EXPIRES_IN_MILLIS
@@ -18,15 +19,15 @@ import com.hse.auth.utils.AuthConstants.KEY_CLIENT_ID
 import com.hse.auth.utils.AuthConstants.KEY_FULL_NAME
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
+import com.hse.auth.utils.safeResult
 import com.hse.core.enums.LoadingState
 import com.hse.core.viewmodels.BaseViewModel
-import com.hse.network.Network
 import kotlinx.coroutines.*
 import org.joda.time.DateTime
 import timber.log.Timber
 import javax.inject.Inject
 
-class AccountManagerViewModel @Inject constructor(val network: Network, val context: Context) :
+class AccountManagerViewModel @Inject constructor(val context: Context, val apiRequests: ApiRequests, val authRequests: AuthRequests) :
     BaseViewModel() {
     override val loadingState = MutableLiveData<LoadingState>()
 
@@ -105,22 +106,22 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                 //Токен не протух
                 if (accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
                     Timber.i("Try for get user for token")
-                    GetMeRequest(token).run(network)
-                        ?.let { meEntity ->
-                            accountsDataList.add(
-                                UserAccountData(
-                                    acc.name,
-                                    meEntity.avatarUrl,
-                                    meEntity.fullName,
-                                    token,
-                                    refreshToken,
-                                    accessExpiresIn,
-                                    refreshExpiresIn,
-                                    clientId
-                                )
+                    val me = safeResult<MeDataEntity> { apiRequests.getMe(ApiRequests.getAuthHeader(token)) }
+                    me?.let { meEntity ->
+                        accountsDataList.add(
+                            UserAccountData(
+                                acc.name,
+                                meEntity.avatarUrl,
+                                meEntity.fullName,
+                                token,
+                                refreshToken,
+                                accessExpiresIn,
+                                refreshExpiresIn,
+                                clientId
                             )
-                            Timber.i( "Successful got user data with token from acc manager")
-                        }
+                        )
+                        Timber.i("Successful got user data with token from acc manager")
+                    }
                 } else {// Протух
                     accountsDataList.add(
                         UserAccountData(
@@ -138,7 +139,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                 Unit
             }.join()
         }
-        Timber.i( "For end")
+        Timber.i("For end")
         _userAccountsLiveData.postValue(accountsDataList)
         loadingState.postValue(LoadingState.DONE)
     }
@@ -152,13 +153,13 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
     }
 
     fun onAccountClicked(userAccountData: UserAccountData) {
-        Timber.i( "OnAccountClicked")
+        Timber.i("OnAccountClicked")
         //Токен не протух
         if (userAccountData.accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
-            Timber.i( "Access token is fresh")
+            Timber.i("Access token is fresh")
             _loginWithSelectedAccount.value = userAccountData
         } else {//протух, пробуем зарефрешить
-            Timber.i( "Access token is out of date")
+            Timber.i("Access token is out of date")
             refreshAccessToken(userAccountData)
         }
     }
@@ -168,17 +169,16 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
 
             loadingState.postValue(LoadingState.LOADING)
 
-            Timber.i( "Try refresh token")
+            Timber.i("Try refresh token")
             //Рефреш не протух
             if (userAccountData.refreshExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
-                Timber.i( "Refresh is fresh")
-                val tokensResult = RefreshTokenRequest(
-                    clientId = clientId,
-                    refreshToken = userAccountData.refreshToken
-                ).run(network)
+                Timber.i("Refresh is fresh")
+                val tokensResult = safeResult<TokensModel> {
+                    authRequests.getRefreshToken(clientId, userAccountData.refreshToken)
+                }
 
                 if (tokensResult != null) {
-                    Timber.i( "Successfully refreshed")
+                    Timber.i("Successfully refreshed")
                     var userEmail = ""
                     JWT(tokensResult.accessToken).getClaim(AuthConstants.KEY_EMAIL).asString()
                         ?.let {
@@ -191,9 +191,8 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                             userEmail = it
                         }
 
-                    GetMeRequest(tokensResult.accessToken).run(network)
+                    safeResult<MeDataEntity> { apiRequests.getMe(ApiRequests.getAuthHeader(tokensResult.accessToken)) }
                         ?.let { meEntity ->
-
                             val accountData = UserAccountData(
                                 email = userEmail,
                                 accessToken = tokensResult.accessToken,
@@ -210,7 +209,7 @@ class AccountManagerViewModel @Inject constructor(val network: Network, val cont
                         }
                 }
             } else {//рефреш протух, полный перелогин
-                Timber.i( "Refresh is out of date")
+                Timber.i("Refresh is out of date")
                 _reloginWithSelectedAccount.postValue(userAccountData)
             }
 
