@@ -59,6 +59,9 @@ class WebViewCredentialsFragment :
             }
     }
 
+    private var clientId: String? = null
+    private var redirectUri: String? = null
+
     @Inject
     lateinit var viewModelFactory: BaseViewModelFactory
     private var redirectUrl: String? = null
@@ -101,8 +104,8 @@ class WebViewCredentialsFragment :
                         progress_bar?.setVisible()
                         viewModel.onCodeLoaded(
                             code,
-                            requireContext().getClientId(),
-                            requireContext().getRedirectUri()
+                            clientId ?: "",
+                            redirectUri ?: ""
                         )
                     }
                 }
@@ -113,6 +116,8 @@ class WebViewCredentialsFragment :
 
 
     private fun initWbView() {
+        clientId = requireContext().getClientId()
+        redirectUri = requireContext().getRedirectUri()
         CookieManager.getInstance().apply {
             removeAllCookies(null)
             removeSessionCookies(null)

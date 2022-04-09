@@ -22,7 +22,7 @@ suspend inline fun <reified T> safeResult(task: (() -> ResponseBody)): T? {
         val raw = task.invoke().string()
         Gson().fromJson<T>(raw)
     } catch (e: Exception) {
-        Timber.tag("AuthSafeRunError").e(e)
+        Timber.tag("AuthSafeRunError").d(e)
         null
     }
 }
