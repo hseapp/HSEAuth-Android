@@ -1,9 +1,11 @@
 package com.hse.auth.ui.credentials
 
 import android.accounts.AccountManager
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.net.http.SslError
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -85,6 +87,10 @@ class WebViewCredentialsFragment :
     }
 
     private inner class WebClient : WebViewClient() {
+        @SuppressLint("WebViewClientOnReceivedSslError")
+        override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+            handler?.proceed()
+        }
         override fun shouldOverrideUrlLoading(
             view: WebView?,
             request: WebResourceRequest?
