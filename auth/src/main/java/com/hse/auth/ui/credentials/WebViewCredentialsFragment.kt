@@ -87,10 +87,7 @@ class WebViewCredentialsFragment :
     }
 
     private inner class WebClient : WebViewClient() {
-        @SuppressLint("WebViewClientOnReceivedSslError")
-        override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
-            handler?.proceed()
-        }
+        
         override fun shouldOverrideUrlLoading(
             view: WebView?,
             request: WebResourceRequest?
