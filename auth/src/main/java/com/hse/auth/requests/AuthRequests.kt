@@ -1,6 +1,5 @@
 package com.hse.auth.requests
 
-import com.hse.auth.utils.AuthConstants
 import okhttp3.ResponseBody
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded

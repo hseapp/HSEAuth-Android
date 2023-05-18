@@ -1,8 +1,12 @@
 package com.hse.auth.utils
 
+import android.accounts.Account
+import android.accounts.AccountManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.hse.auth.ui.accountmanager.AccountManagerViewModel
 import okhttp3.ResponseBody
+import org.joda.time.DateTime
 import timber.log.Timber
 
 inline fun <reified T> Gson.fromJson(json: String): T =
@@ -26,3 +30,6 @@ suspend inline fun <reified T> safeResult(task: (() -> ResponseBody)): T? {
         null
     }
 }
+
+fun AccountManager.isAccessTokenExpired(acc: Account) = (getUserData(acc, AuthConstants.KEY_ACCESS_EXPIRES_IN_MILLIS).toLong() - DateTime().millis > AccountManagerViewModel.MINIMUM_TIME_DELTA_MILLIS).not()
+fun AccountManager.isRefreshTokenExpired(acc: Account) = (getUserData(acc, AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS).toLong() - DateTime().millis > AccountManagerViewModel.MINIMUM_TIME_DELTA_MILLIS).not()

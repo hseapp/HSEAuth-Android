@@ -12,6 +12,8 @@ import com.hse.auth.models.TokensModel
 import com.hse.auth.requests.ApiRequests
 import com.hse.auth.requests.AuthRequests
 import com.hse.auth.ui.models.UserAccountData
+import com.hse.auth.ui.models.isAccessTokenFresh
+import com.hse.auth.ui.models.isRefreshTokenFresh
 import com.hse.auth.utils.AuthConstants
 import com.hse.auth.utils.AuthConstants.KEY_ACCESS_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_AVATAR_URL
@@ -19,6 +21,7 @@ import com.hse.auth.utils.AuthConstants.KEY_CLIENT_ID
 import com.hse.auth.utils.AuthConstants.KEY_FULL_NAME
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_EXPIRES_IN_MILLIS
 import com.hse.auth.utils.AuthConstants.KEY_REFRESH_TOKEN
+import com.hse.auth.utils.isAccessTokenExpired
 import com.hse.auth.utils.safeResult
 import com.hse.core.enums.LoadingState
 import com.hse.core.viewmodels.BaseViewModel
@@ -38,7 +41,7 @@ class AccountManagerViewModel @Inject constructor(val context: Context, val apiR
         //Минимальное значение времени, которое токен ещё должен быть жив после проверки
         //То есть чтобы он не был протухшим сразу после проверки, а был жив хотя бы 10 секунд
         //для выполнения последующиъ операций
-        private const val MINIMUM_TIME_DELTA_MILLIS = 30000L
+        const val MINIMUM_TIME_DELTA_MILLIS = 30000L
     }
 
     private val exceptionsHandler = CoroutineExceptionHandler { _, throwable ->
@@ -104,7 +107,7 @@ class AccountManagerViewModel @Inject constructor(val context: Context, val apiR
                 Timber.i("Data from acc manager")
 
                 //Токен не протух
-                if (accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
+                if (accountManager.isAccessTokenExpired(acc).not()) {
                     Timber.i("Try for get user for token")
                     val me = safeResult<MeDataEntity> { apiRequests.getMe(ApiRequests.getAuthHeader(token)) }
                     me?.let { meEntity ->
@@ -155,7 +158,7 @@ class AccountManagerViewModel @Inject constructor(val context: Context, val apiR
     fun onAccountClicked(userAccountData: UserAccountData) {
         Timber.i("OnAccountClicked")
         //Токен не протух
-        if (userAccountData.accessExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
+        if (userAccountData.isAccessTokenFresh()) {
             Timber.i("Access token is fresh")
             _loginWithSelectedAccount.value = userAccountData
         } else {//протух, пробуем зарефрешить
@@ -171,7 +174,7 @@ class AccountManagerViewModel @Inject constructor(val context: Context, val apiR
 
             Timber.i("Try refresh token")
             //Рефреш не протух
-            if (userAccountData.refreshExpiresIn - DateTime().millis > MINIMUM_TIME_DELTA_MILLIS) {
+            if (userAccountData.isRefreshTokenFresh()) {
                 Timber.i("Refresh is fresh")
                 val tokensResult = safeResult<TokensModel> {
                     authRequests.getRefreshToken(clientId, userAccountData.refreshToken)
