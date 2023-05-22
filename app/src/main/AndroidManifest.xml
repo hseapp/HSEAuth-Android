@@ -27,17 +27,17 @@
 
                 <data
                     android:host="auth.hse.ru"
-                    android:scheme="ru.hse.pf" />
+                    android:scheme="hseappx" />
             </intent-filter>
         </activity>
 
         <meta-data
             android:name="auth.hse.ru.client_id"
-            android:value="0d46ae05-3bbc-4346-a3a3-1d732b49ea53" />
+            android:value="9e1b36da-3250-4007-8949-2376593d1d78" />
 
         <meta-data
             android:name="auth.hse.ru.redirect_uri"
-            android:value="ru.hse.pf://auth.hse.ru/adfs/oauth2/android/ru.hse.pf/callback" />
+            android:value="hseappx://hse_redirect" />
     </application>
 
 </manifest>

@@ -9,7 +9,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.*
+import android.webkit.CookieManager
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -39,7 +43,8 @@ import com.hse.core.common.BaseViewModelFactory
 import com.hse.core.common.setGone
 import com.hse.core.common.setVisible
 import com.hse.core.ui.BaseFragment
-import kotlinx.android.synthetic.main.fragment_web_auth.*
+import kotlinx.android.synthetic.main.fragment_web_auth.progress_bar
+import kotlinx.android.synthetic.main.fragment_web_auth.web_view
 import javax.inject.Inject
 
 
@@ -99,7 +104,8 @@ class WebViewCredentialsFragment :
             url ?: return
             val sbstr = url.indexOf('?')
             if (sbstr > 0 && sbstr < url.length) {
-                if (url.substring(0, sbstr) == redirectUrl) {
+                val compareSubstr = url.substring(0, sbstr).dropLastWhile { it == '/' }
+                if (compareSubstr == redirectUrl) {
                     val uri = Uri.parse(url)
                     uri?.getQueryParameter(AuthConstants.KEY_CODE)?.let { code ->
                         web_view?.setGone()
