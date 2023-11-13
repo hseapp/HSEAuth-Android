@@ -12,9 +12,19 @@
 
 Для взаимодействия с авторизационным сервером (auth.hse.ru) подтребуются уникальные client_id и redirect_uri. Для их получения напишите нам на apps@hse.ru письмо с названием проекта, его кратким описанием и составом команды разработки.
 
+В gradle добавляем:
 ```
+repositories {
+        ...
+        mavenCentral()
+        jcenter()
+        maven(url = "https://jitpack.io")
+}
+    
+...
+
 dependencies {
-  implementation 'com.github.hseapp:HseAuth-Android:0.9.10'
+  implementation 'com.github.hseapp:HseAuth-Android:1.0.5'
 }
 ```
 
@@ -54,14 +64,15 @@ dependencies {
    </intent-filter>
 ```
 
-#### 3. В выбранной активити переопределяем onNewIntent() и прокидываем интент в AuthHelper
+#### 3. В выбранной активити инициализируем AuthHelper
 ```
-override fun onNewIntent(intent: Intent?) {
-        AuthHelper.onNewIntent(intent, this, REQUEST_LOGIN)
-        super.onNewIntent(intent)
+override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        
+        AuthHelper.init(this)
     }
 ```
-REQUEST_LOGIN - это любая константа
 
 #### 4. В этой же активити переопределяем onActivityResult(), чтобы получить ответ с токенами
 ```
@@ -72,13 +83,13 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
                 if (resultCode != Activity.RESULT_OK || data == null) return
                 val accessToken = data.getStringExtra(AuthConstants.KEY_ACCESS_TOKEN)
                 val refreshToken = data.getStringExtra(AuthConstants.KEY_REFRESH_TOKEN)
-                viewModel.updateLoginState(accessToken, refreshToken)
             }
         }
     }
 ```
 
 #### 5. Запускаем авторизацию через AuthHelper там, где нам нужно, всё в той же активити
+REQUEST_LOGIN - это любая константа
 ```
 private fun requestLogin(mode: Mode) {
         AuthHelper.login(this, mode, REQUEST_LOGIN)
@@ -86,5 +97,36 @@ private fun requestLogin(mode: Mode) {
 ```
 
 В зависимости от наличия данных в AccountManager откроется либо webView с авторизацией, либо можно будет зайти по тем данным, которые есть в AccountManger. В любом случае токены будут прилетать в onActivityResult()
+
+#### 6. Для обновления access-токена используйте метод AuthHelper.refreshToken
+```
+AuthHelper.refreshToken(refreshToken, callback = object : AuthHelper.OnTokenCallback {
+                override fun onResult(model: TokensModel) {
+                    Log.e(TAG, model.toString())
+                }
+
+                override fun onError(e: Exception) {
+                    Log.e(TAG, null, e)
+                }
+            })
+```
+
+#### 7. Чтобы проверить свежий ли access-токен можно использовать метод AuthHelper.accessTokenIsFresh
+```
+val isTokenFresh: Boolean = AuthHelper.accessTokenIsFresh(accessToken)
+```
+
+#### 8. Для получения ФИО и аватара юзера используйте AuthHelper.getMe
+```
+AuthHelper.getMe(accessToken, onMeCallback = object : AuthHelper.OnMeCallback {
+                override fun onResult(model: MeDataEntity) {
+                    Log.e(TAG, model.toString())
+                }
+
+                override fun onError(e: Exception) {
+                    Log.e(TAG, null, e)
+                }
+            })
+```
 
 Пример реализации можно посмотреть в тестовом приложении репозитория.

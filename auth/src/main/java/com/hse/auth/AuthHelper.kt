@@ -28,10 +28,12 @@ object AuthHelper {
     private fun checkIsInit() =
         if (this::presets.isInitialized.not()) throw (Exception("Класс AuthHelper не был проинициализирован методом init.")) else Unit
 
+    @JvmStatic
     fun init(context: Context) {
         presets = Presets(context)
     }
 
+    @JvmStatic
     fun login(activity: Activity, requestCode: Int) {
         LoginActivity.launch(activity, requestCode)
     }
@@ -42,11 +44,11 @@ object AuthHelper {
      * В случае какой-либо ошибки сработает коллбэк [onError].
      */
     @JvmStatic
-    fun refreshToken(refreshToken: String, onResult: (TokensModel) -> Unit, onError: (Exception) -> Unit) {
+    fun refreshToken(refreshToken: String, callback: OnTokenCallback) {
         checkIsInit()
         scope.launch {
             val tokensResult = safeResult<TokensModel>(onCatch = {
-                onError.invoke(it)
+                callback.onError(it)
                 return@launch
             }) {
                 presets.authApiRequests.getRefreshToken(presets.clientID, refreshToken)
@@ -65,9 +67,9 @@ object AuthHelper {
                     ?.let {
                         userEmail = it
                     }
-                onResult.invoke(tokensResult)
+                callback.onResult(tokensResult)
             } else {
-                onError.invoke(NullAuthResponseException())
+                callback.onError(NullAuthResponseException())
             }
         }
     }
@@ -75,19 +77,19 @@ object AuthHelper {
     /**
      * Возвращает аватар и ФИО юзера по access_token.
      *
-     * В случае какой-либо ошибки сработает коллбэк [onError].
+     * В случае какой-либо ошибки сработает коллбэк [OnMeCallback.onError].
      */
-    fun getMe(accessToken: String, onResult: (MeDataEntity) -> Unit, onError: (Exception) -> Unit) {
+    fun getMe(accessToken: String, onMeCallback: OnMeCallback) {
         checkIsInit()
         scope.launch {
             safeResult<MeDataEntity>(onCatch = {
-                onError.invoke(it)
+                onMeCallback.onError(it)
                 return@launch
             }) { presets.apiRequests.getMe(ApiRequests.getAuthHeader(accessToken)) }
                 ?.let { meEntity ->
-                    onResult.invoke(meEntity)
+                    onMeCallback.onResult(meEntity)
                 } ?: run {
-                onError.invoke(NullAuthResponseException())
+                onMeCallback.onError(NullAuthResponseException())
             }
         }
     }
@@ -102,4 +104,14 @@ object AuthHelper {
 
     @JvmStatic
     fun getClientId() = BaseApplication.appContext.getClientId()
+
+    interface OnTokenCallback {
+        fun onResult(model: TokensModel)
+        fun onError(e: Exception)
+    }
+
+    interface OnMeCallback {
+        fun onResult(model: MeDataEntity)
+        fun onError(e: Exception)
+    }
 }

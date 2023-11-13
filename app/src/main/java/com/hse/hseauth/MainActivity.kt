@@ -7,6 +7,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.hse.auth.AuthHelper
+import com.hse.auth.models.MeDataEntity
+import com.hse.auth.models.TokensModel
 import com.hse.auth.utils.AuthConstants
 
 class MainActivity : AppCompatActivity() {
@@ -31,16 +33,24 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, refreshToken)
             Log.e(TAG, AuthHelper.accessTokenIsFresh(accessToken).toString())
 
-            AuthHelper.refreshToken(refreshToken, onResult = { model ->
-                Log.e(TAG, model.toString())
-            }, onError = { e ->
-                Log.e(TAG, null, e)
+            AuthHelper.refreshToken(refreshToken, callback = object : AuthHelper.OnTokenCallback {
+                override fun onResult(model: TokensModel) {
+                    Log.e(TAG, model.toString())
+                }
+
+                override fun onError(e: Exception) {
+                    Log.e(TAG, null, e)
+                }
             })
 
-            AuthHelper.getMe(accessToken, onResult = { model ->
-                Log.e(TAG, model.toString())
-            }, onError = { e ->
-                Log.e(TAG, null, e)
+            AuthHelper.getMe(accessToken, onMeCallback = object : AuthHelper.OnMeCallback {
+                override fun onResult(model: MeDataEntity) {
+                    Log.e(TAG, model.toString())
+                }
+
+                override fun onError(e: Exception) {
+                    Log.e(TAG, null, e)
+                }
             })
         }
     }
