@@ -24,7 +24,7 @@ repositories {
 ...
 
 dependencies {
-  implementation 'com.github.hseapp:HseAuth-Android:1.0.5'
+  implementation 'com.github.hseapp:HseAuth-Android:1.1.0'
 }
 ```
 

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.HseAuth">
+        <activity
+            android:exported="true"
+            android:name=".MainActivity"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth.hse.ru"
+                    android:scheme="ru.hse.pf" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="auth.hse.ru.client_id"
+            android:value="0d46ae05-3bbc-4346-a3a3-1d732b49ea53" />
+
+        <meta-data
+            android:name="auth.hse.ru.redirect_uri"
+            android:value="ru.hse.pf://auth.hse.ru/adfs/oauth2/android/ru.hse.pf/callback" />
+    </application>
+
+</manifest>

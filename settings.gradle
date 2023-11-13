@@ -1,3 +1,4 @@
 include ':app'
 include ':auth'
 rootProject.name = "HseAuth"
+include ':java-sample'

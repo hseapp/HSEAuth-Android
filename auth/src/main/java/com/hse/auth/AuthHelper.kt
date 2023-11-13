@@ -79,6 +79,7 @@ object AuthHelper {
      *
      * В случае какой-либо ошибки сработает коллбэк [OnMeCallback.onError].
      */
+    @JvmStatic
     fun getMe(accessToken: String, onMeCallback: OnMeCallback) {
         checkIsInit()
         scope.launch {
