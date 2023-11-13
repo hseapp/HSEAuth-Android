@@ -10,7 +10,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <application>
+    <application
+        android:name=".AuthApp"
+        >
         <activity
             android:name=".ui.LoginActivity"
             android:configChanges="orientation|screenSize"

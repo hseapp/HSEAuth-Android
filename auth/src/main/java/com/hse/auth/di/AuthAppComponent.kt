@@ -1,8 +1,9 @@
-package com.hse.hseauth
+package com.hse.auth.di
 
 import android.app.Application
-import com.hse.auth.di.AuthComponent
-import com.hse.auth.di.AuthModule
+import com.hse.auth.AuthApp
+import com.hse.auth.AuthHelper
+import com.hse.auth.Presets
 import com.hse.core.di.AppModule
 import com.hse.core.di.BaseAppComponent
 import com.hse.core.di.CoreModule
@@ -12,10 +13,11 @@ import javax.inject.Singleton
 
 @Singleton
 @Component(modules = [AppModule::class, AuthModule::class, CoreModule::class])
-interface AppComponent : BaseAppComponent {
+internal interface AuthAppComponent : BaseAppComponent {
 
-    fun inject(app: App)
-    fun inject(activity: MainActivity)
+    fun inject(app: AuthApp)
+    fun inject(helper: Presets)
+    //fun inject(activity: MainActivity)
 
     fun loginComponent(): AuthComponent.Factory
 
@@ -24,6 +26,6 @@ interface AppComponent : BaseAppComponent {
         @BindsInstance
         fun application(application: Application): Builder
 
-        fun build(): AppComponent
+        fun build(): AuthAppComponent
     }
 }

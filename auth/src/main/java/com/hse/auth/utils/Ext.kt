@@ -21,11 +21,12 @@ fun String?.toIntSafe(): Int {
     }
 }
 
-suspend inline fun <reified T> safeResult(task: (() -> ResponseBody)): T? {
+suspend inline fun <reified T> safeResult(onCatch: (Exception) -> Unit = {}, task: (() -> ResponseBody)): T? {
     return try {
         val raw = task.invoke().string()
         Gson().fromJson<T>(raw)
     } catch (e: Exception) {
+        onCatch.invoke(e)
         Timber.tag("AuthSafeRunError").d(e)
         null
     }
