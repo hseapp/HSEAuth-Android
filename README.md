@@ -91,9 +91,7 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 #### 5. Запускаем авторизацию через AuthHelper там, где нам нужно, всё в той же активити
 REQUEST_LOGIN - это любая константа
 ```
-private fun requestLogin(mode: Mode) {
-        AuthHelper.login(this, mode, REQUEST_LOGIN)
-        }
+AuthHelper.login(this, REQUEST_LOGIN)
 ```
 
 В зависимости от наличия данных в AccountManager откроется либо webView с авторизацией, либо можно будет зайти по тем данным, которые есть в AccountManger. В любом случае токены будут прилетать в onActivityResult()
